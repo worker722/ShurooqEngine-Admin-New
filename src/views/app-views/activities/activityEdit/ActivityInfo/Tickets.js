@@ -1,28 +1,19 @@
 import React, { useState, useEffect, Fragment } from "react";
-import * as Yup from "yup";
-import { Field, Form, Formik } from "formik";
+import { Form, Button, Input, Checkbox, InputNumber, Select } from "antd";
 import { useDispatch } from "react-redux";
 import { shallowEqual, useSelector } from "react-redux";
 import * as actions from "../../../../_redux/activities/activitiesActions";
-import { NumericTextBox } from "@progress/kendo-react-inputs";
-import { Checkbox } from "@progress/kendo-react-inputs";
 import { MultiSelect } from "@progress/kendo-react-dropdowns";
+import { CloseCircleOutlined } from '@ant-design/icons';
 
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
+
+const { Option } = Select;
 
 function Tickets(props) {
-
-    const initialValues = {
-
-    };
-
-    const Schema = Yup.object().shape({
-
-    });
 
     const dispatch = useDispatch();
     const { editId } = props;
@@ -73,43 +64,38 @@ function Tickets(props) {
         setInputFields(values);
     };
 
-    const dailyChanged = (event, index) => {
-        const { value } = event.target;
+    const dailyChanged = (value, index) => {
         const list = [...inputFields];
         list[index]['daily_limit'] = value;
         setInputFields(list);
     };
 
-    const srcPriceChanged = (event, index) => {
-        const { value } = event.target;
+    const srcPriceChanged = (value, index) => {
         const list = [...inputFields];
         list[index]['cost_price'] = value;
         setInputFields(list);
     };
 
-    const markupPriceChanged = (event, index) => {
-        const { value } = event.target;
+    const markupPriceChanged = (value, index) => {
         const list = [...inputFields];
         list[index]['markup_price'] = value;
         setInputFields(list);
     };
 
-    const ticketNameChanged = (event, index) => {
-        const { value } = event.target;
+    const ticketNameChanged = ({ target: { value } }, index) => {
         const list = [...inputFields];
         list[index]['ticket_name'] = value;
         setInputFields(list);
     };
 
-    const ticketNameARChanged = (event, index) => {
-        const { value } = event.target;
+    const ticketNameARChanged = ({ target: { value } }, index) => {
         const list = [...inputFields];
         list[index]['ticket_name_ar'] = value;
         setInputFields(list);
     };
 
     const enableChanged = (event, index) => {
-        const { value } = event;
+        const value = event.target.checked;
         const list = [...inputFields];
         list[index]['enable'] = value;
         setInputFields(list);
@@ -178,148 +164,136 @@ function Tickets(props) {
         setInputFields(list);
     };
 
+    const [form] = Form.useForm();
+    const onFinish = values => {
+        let data = {};
+        data["id"] = addActivityId;
+        data["tickets"] = JSON.stringify(inputFields);
+
+        editActivity(JSON.stringify(data));
+    };
+
     return (
+        <Form form={form} initialValues={activityData} name="control-hooks" onFinish={onFinish} style={{ width: '100%', marginTop: 100 }}>
 
-        <Formik
-            enableReinitialize={true}
-            initialValues={activityData.daily_adult_limit ? activityData : initialValues}
-            validationSchema={Schema}
-            onSubmit={(values) => {
-                let data = {};
-                data["id"] = addActivityId;
-                data["tickets"] = JSON.stringify(inputFields);
-
-                editActivity(JSON.stringify(data));
-            }}
-        >
-            {({ handleSubmit }) => (
-
-                <Form className="form form-label-right">
-
-                    <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
-                        <DialogContent dividers>
-                            <Typography gutterBottom>
-                                <b>Success</b>
-                            </Typography>
-                            <Typography gutterBottom style={{ marginTop: "10px" }}>
-                                {addActivityStatusData}
-                            </Typography>
-                            <Typography gutterBottom style={{ marginTop: "10px" }}>
-                                <Button autoFocus onClick={handleClose} style={{ backgroundColor: "#4ef508de", color: "white" }}>
-                                    Okay
-                                </Button>
-                            </Typography>
-                        </DialogContent>
-                    </Dialog>
-
-                    <div className="form-group row" style={{ marginTop: '100px' }}>
-                        <div className="col-2">
-                            <button
-                                className="btn btn-Tab"
-                                type="button"
-                                style={{ float: "right" }}
-                                onClick={() => handleAddFields()}
-                            >
-                                Add Tickets
-                            </button>
-                        </div>
-                        <div className="col-12"></div>
+            <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
+                <DialogContent dividers>
+                    <Typography gutterBottom>
+                        <b>Success</b>
+                    </Typography>
+                    <Typography gutterBottom style={{ marginTop: "10px" }}>
+                        {addActivityStatusData}
+                    </Typography>
+                    <Typography gutterBottom style={{ marginTop: "10px" }}>
+                        <Button autoFocus onClick={handleClose} style={{ backgroundColor: "#4ef508de", color: "white" }}>
+                            Okay
+                        </Button>
+                    </Typography>
+                </DialogContent>
+            </Dialog>
+            <Form.Item>
+                <div className="form-group row">
+                    <div className="col-2">
+                        <Button
+                            className="mr-2"
+                            type="primary"
+                            style={{ float: "right" }}
+                            onClick={() => handleAddFields()}
+                        >
+                            Add
+                        </Button>
                     </div>
 
-                    <div className="form-row" style={{ marginTop: "10px" }}>
+                    <div className="col-10 form-row">
                         {inputFields.map((inputDate, index) => (
                             <Fragment key={index}>
-                                <div className="col-2"></div>
-                                <div className="col-2">
-                                    <input
-                                        type="text"
-                                        name="random"
-                                        readOnly
-                                        style={{ width: '70px', height: '30px' }}
-                                        value={inputDate.id}
-                                    />
-                                </div>
-                                <div className="col-3">
-                                    <label className="col-form-label" style={{ marginRight: 20 }}>Ticket Name</label>
-                                    <input
-                                        type="text"
-                                        style={{ width: '150px', height: '30px' }}
-                                        value={inputDate.ticket_name}
-                                        onChange={e => ticketNameChanged(e, index)}
-                                    />
-                                </div>
-
-                                <div className="col-3">
-                                    <label className="col-form-label" style={{ marginRight: 20 }}>Ticket Name AR</label>
-                                    <input
-                                        type="text"
-                                        style={{ width: '150px', height: '30px' }}
-                                        value={inputDate.ticket_name_ar}
-                                        onChange={e => ticketNameARChanged(e, index)}
-                                    />
-                                </div>
-                                <div className="col-form-label">
-                                    <span className="btn btn-xs btn-icon btn-circle btn-white btn-hover-text-primary btn-shadow" style={{ backgroundColor: "#8950fc" }} onClick={() => handleRemoveFields(index)}>
-                                        <i className="ki ki-bold-close icon-xs text-muted"></i>
-                                    </span>
-                                </div>
-                                <div className="col-2">
-                                </div>
-
-                                <div className="row" style={{ width: '100%' }}>
-                                    <div className="col-2" style={{ marginLeft: 20 }}>
-                                        <label>
-                                            Cost Price
-                                            <NumericTextBox
-                                                name="adult_limit"
-                                                onChange={e => srcPriceChanged(e, index)}
-                                                value={inputDate.cost_price}
-                                            />{" "}
-                                        </label>
-                                    </div>
-                                    <div className="col-2" style={{ marginLeft: 20 }}>
-                                        <label>
-                                            MarkUp Price
-                                            <NumericTextBox
-                                                name="adult_limit"
-                                                onChange={e => markupPriceChanged(e, index)}
-                                                value={inputDate.markup_price}
-                                            />{" "}
-                                        </label>
-                                    </div>
-                                    <div className="col-2" style={{ marginLeft: 20 }}>
-                                        <label>
-                                            Daily Limit
-                                            <NumericTextBox
-                                                name="adult_limit"
-                                                onChange={e => dailyChanged(e, index)}
-                                                value={inputDate.daily_limit}
-                                            />{" "}
-                                        </label>
-                                    </div>
-                                    <div className="col-3" style={{ marginLeft: 20 }}>
-                                        <MultiSelect data={activityListData} onChange={e => onActivityChange(e, index)} value={inputDate.platforms} dataItemKey="id" textField="platform_name" />
-                                    </div>
-                                    <div className="col-form-label">
-                                        <Checkbox name="enable" label="Enable" onChange={e => enableChanged(e, index)} value={inputDate.enable} />
-                                    </div>
+                                <div className="form-row" style={{ marginTop: "15px" }}>
                                     <div className="col-1"></div>
+                                    <div className="col-2">
+                                        <Input
+                                            name="random"
+                                            readOnly
+                                            style={{ width: '100px', height: '40px' }}
+                                            value={inputDate.id}
+                                        />
+                                    </div>
+                                    <div className="col-3">
+                                        <label className="col-form-label" style={{ marginRight: 20 }}>Ticket Name</label>
+                                        <Input
+                                            style={{ width: '150px', height: '40px' }}
+                                            value={inputDate.ticket_name}
+                                            onChange={e => ticketNameChanged(e, index)}
+                                        />
+                                    </div>
+
+                                    <div className="col-3">
+                                        <label className="col-form-label" style={{ marginRight: 20 }}>Ticket Name AR</label>
+                                        <Input
+                                            style={{ width: '150px', height: '40px' }}
+                                            value={inputDate.ticket_name_ar}
+                                            onChange={e => ticketNameARChanged(e, index)}
+                                        />
+                                    </div>
+                                    <div className="col-form-label" style={{ marginLeft: 20 }}>
+                                        <span onClick={() => handleRemoveFields(index)}>
+                                            <CloseCircleOutlined />
+                                        </span>
+                                    </div>
+                                    <div className="col-2">
+                                    </div>
+
+                                    <div className="row" style={{ width: '100%', marginTop: 10 }}>
+                                        <div className="col-2" style={{ marginLeft: 20 }}>
+                                            <label>
+                                                Cost Price
+                                                <InputNumber
+                                                    min={0}
+                                                    onChange={e => srcPriceChanged(e, index)}
+                                                    defaultValue={inputDate.cost_price}
+                                                />{" "}
+                                            </label>
+                                        </div>
+                                        <div className="col-2" style={{ marginLeft: 20 }}>
+                                            <label>
+                                                MarkUp Price
+                                                <InputNumber
+                                                    min={0}
+                                                    onChange={e => markupPriceChanged(e, index)}
+                                                    defaultValue={inputDate.markup_price}
+                                                />{" "}
+                                            </label>
+                                        </div>
+                                        <div className="col-2" style={{ marginLeft: 20 }}>
+                                            <label>
+                                                Daily Limit
+                                                <InputNumber
+                                                    min={0}
+                                                    onChange={e => dailyChanged(e, index)}
+                                                    defaultValue={inputDate.daily_limit}
+                                                />{" "}
+                                            </label>
+                                        </div>
+                                        <div className="col-3" style={{ marginLeft: 20 }}>
+                                            <MultiSelect data={activityListData} onChange={e => onActivityChange(e, index)} value={inputDate.platforms} dataItemKey="id" textField="platform_name" />
+                                        </div>
+                                        <div className="col-form-label">
+                                            <Checkbox name="enable" onChange={e => enableChanged(e, index)} checked={inputDate.enable} >Enable</Checkbox>
+                                        </div>
+                                        <div className="col-1"></div>
+                                    </div>
                                 </div>
                             </Fragment>
                         ))}
                     </div>
+                </div>
+            </Form.Item>
 
-                    <div className="form-group">
-                        <button
-                            type="submit"
-                            className={`btn btn-Tab`}
-                            style={{ float: "right" }}
-                            onSubmit={() => handleSubmit()}
-                        >Submit</button>
-                    </div>
-                </Form>
-            )}
-        </Formik>
+            <Form.Item>
+                <Button className="mr-2" type="primary" htmlType="submit" style={{ float: 'right' }} >
+                    Submit
+                </Button>
+            </Form.Item>
+        </Form>
     );
 }
 

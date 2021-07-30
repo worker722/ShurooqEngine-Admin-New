@@ -1,26 +1,20 @@
 import React, { useState, Fragment, useEffect } from "react";
-import * as Yup from "yup";
-import { Form, Formik, setIn } from "formik";
+import { Form, Button, Input, Checkbox, DatePicker, TimePicker, InputNumber } from "antd";
 import { useDispatch } from "react-redux";
 import { shallowEqual, useSelector } from "react-redux";
 import * as actions from "../../../../_redux/activities/activitiesActions";
-import { Checkbox } from "@progress/kendo-react-inputs";
-import { TimePicker } from "@progress/kendo-react-dateinputs";
-import { NumericTextBox } from "@progress/kendo-react-inputs";
-import { DatePicker } from "@progress/kendo-react-dateinputs";
-import { format } from 'date-fns'
+import moment from 'moment';
+import { CloseCircleOutlined } from '@ant-design/icons';
 
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
+
+const timeFormat = 'HH:mm:ss';
+const dateFormat = 'YYYY-MM-DD';
 
 const TimeSlots = (props) => {
-  const initialValues = {
-  };
-  const Schema = Yup.object().shape({
-  });
 
   const dispatch = useDispatch();
   const { editId } = props;
@@ -92,20 +86,6 @@ const TimeSlots = (props) => {
     setRandomIdT(makeRandomIdT());
     setInputFields([...inputFields, { id: randomIdT, start_time: new Date(), end_time: new Date(), enable: false, daliy_limit: 0 }]);
     setAddTimeSlotData([...inputFields, { id: randomIdT, start_time: new Date(), end_time: new Date(), enable: false, daliy_limit: 0 }]);
-
-    // for (var i = 0; i < inputDate.length; i++) {
-    //   let startDate = inputDate[i]['start_date'];
-    //   let endDate = inputDate[i]['end_date'];
-    //   let timeSlts = inputDate[i]['timeslots'];
-    //   let timeData = {
-    //     id: randomId, start_time: new Date(), end_time: new Date(), daliy_limit: 0, enable: false
-    //   }
-    //   timeSlts.push(timeData);
-    //   let newArr = [...inputDate];
-    //   newArr[i] = { start_date: startDate, end_date: endDate, timeslots: timeSlts };
-
-    //   setInputDate(newArr);
-    // }
   };
 
   const handleRemoveFields = (index) => {
@@ -116,24 +96,21 @@ const TimeSlots = (props) => {
 
   };
 
-  const startTimeChanged = (event, index) => {
-    const { value } = event.target;
+  const startTimeChanged = (time, index) => {
     const list = [...inputFields];
-    list[index]['start_time'] = value;
+    list[index]['start_time'] = time.toString();
     setInputFields(list);
     setAddTimeSlotData(list);
   };
 
-  const endTimeChanged = (event, index) => {
-    const { value } = event.target;
+  const endTimeChanged = (time, index) => {
     const list = [...inputFields];
-    list[index]['end_time'] = value;
+    list[index]['end_time'] = time.toString();
     setInputFields(list);
     setAddTimeSlotData(list);
   };
 
-  const adultChanged = (event, index) => {
-    const { value } = event.target;
+  const adultChanged = (value, index) => {
     const list = [...inputFields];
     list[index]['daliy_limit'] = value;
     setInputFields(list);
@@ -142,7 +119,7 @@ const TimeSlots = (props) => {
 
   const [enableTimeslots, setEnableTimeSlots] = React.useState(false);
   const enableChanged = (event, index) => {
-    const { value } = event;
+    const value = event.target.checked;
     const list = [...inputFields];
     list[index]['enable'] = value;
     setInputFields(list);
@@ -169,17 +146,15 @@ const TimeSlots = (props) => {
     setInputDate(newArr);
   };
 
-  const startDateChanged = (event, index) => {
-    const { value } = event.target;
+  const startDateChanged = (time, index) => {
     const list = [...inputDate];
-    list[index]['start_date'] = value;
+    list[index]['start_date'] = time.toString();
     setInputDate(list);
   };
 
-  const endDateChanged = (event, index) => {
-    const { value } = event.target;
+  const endDateChanged = (time, index) => {
     const list = [...inputDate];
-    list[index]['end_date'] = value;
+    list[index]['end_date'] = time.toString();
     setInputDate(list);
   };
 
@@ -205,34 +180,30 @@ const TimeSlots = (props) => {
 
 
   const enableTimeSlotsChanged = (event) => {
-    const { value } = event;
-    console.log(value)
+    const value = event.target.checked;
     setEnableTimeSlots(value)
   };
 
-  const startTimeSlotChanged = (event, i, index) => {
-    const { value } = event.target;
+  const startTimeSlotChanged = (time, i, index) => {
     const list = [...inputDate];
-    list[i]['timeslots'][index]['start_time'] = value;
+    list[i]['timeslots'][index]['start_time'] = time.toString();
     setInputDate(list);
   };
 
-  const endTimeSlotChanged = (event, i, index) => {
-    const { value } = event.target;
+  const endTimeSlotChanged = (time, i, index) => {
     const list = [...inputDate];
-    list[i]['timeslots'][index]['end_time'] = value;
+    list[i]['timeslots'][index]['end_time'] = time.toString();
     setInputDate(list);
   };
 
-  const adultSlotChanged = (event, i, index) => {
-    const { value } = event.target;
+  const adultSlotChanged = (value, i, index) => {
     const list = [...inputDate];
     list[i]['timeslots'][index]['daliy_limit'] = value;
     setInputDate(list);
   };
 
   const enableSlotChanged = (event, i, index) => {
-    const { value } = event;
+    const value = event.target.checked;
     const list = [...inputDate];
     list[i]['timeslots'][index]['enable'] = value;
     setInputDate(list);
@@ -275,17 +246,16 @@ const TimeSlots = (props) => {
 
   const selectDay = (event, index) => {
     const list = [...inputDay];
-    const { value } = event;
-
+    const value = event.target.checked;
     let spliceNum = -1;
     if (value) {
-      list[index]['days'].push(Number(event.target.element.name))
+      list[index]['days'].push(Number(event.target.name))
     }
     else {
       for (var i = 0; i < list[index]['days'].length; i++) {
-        if (list[index]['days'][i] == event.target.element.name) {
+        if (list[index]['days'][i] == event.target.name) {
           list[index]['days'].splice(i, 1);
-          spliceNum = event.target.element.name;
+          spliceNum = event.target.name;
         }
       }
     }
@@ -300,29 +270,26 @@ const TimeSlots = (props) => {
     setInputDay(newArr);
   };
 
-  const startDayTimeSlotChanged = (event, i, index) => {
-    const { value } = event.target;
+  const startDayTimeSlotChanged = (time, i, index) => {
     const list = [...inputDay];
-    list[i]['timeslots'][index]['start_time'] = value;
+    list[i]['timeslots'][index]['start_time'] = time.toString();
     setInputDay(list);
   };
 
-  const endDayTimeSlotChanged = (event, i, index) => {
-    const { value } = event.target;
+  const endDayTimeSlotChanged = (time, i, index) => {
     const list = [...inputDay];
-    list[i]['timeslots'][index]['end_time'] = value;
+    list[i]['timeslots'][index]['end_time'] = time.toString();
     setInputDay(list);
   };
 
-  const adultDaySlotChanged = (event, i, index) => {
-    const { value } = event.target;
+  const adultDaySlotChanged = (value, i, index) => {
     const list = [...inputDay];
     list[i]['timeslots'][index]['daliy_limit'] = value;
     setInputDay(list);
   };
 
   const enableDaySlotChanged = (event, i, index) => {
-    const { value } = event;
+    const value = event.target.checked;
     const list = [...inputDay];
     list[i]['timeslots'][index]['enable'] = value;
     setInputDay(list);
@@ -453,319 +420,294 @@ const TimeSlots = (props) => {
       handleClickOpen();
   }, [addActivityStatusData]);
 
+  ////////////
+  const [form] = Form.useForm();
+  const onFinish = values => {
+    let data = {};
+    data["id"] = addActivityId;
+    data["timeslot_options"] = JSON.stringify(inputFields);
+    data["timeslots"] = enableTimeslots;
+    data["datewise_timeslot_options"] = JSON.stringify(inputDate);
+    data["daywise_timeslot_options"] = JSON.stringify(inputDay);
+
+    dispatch(actions.editActivity(data, token));
+  };
+
   return (
 
-    <Formik
-      enableReinitialize={true}
-      initialValues={initialValues}
-      validationSchema={Schema}
-      onSubmit={(values) => {
-        let data = {};
-        data["id"] = addActivityId;
-        data["timeslot_options"] = JSON.stringify(inputFields);
-        data["timeslots"] = enableTimeslots;
-        data["datewise_timeslot_options"] = JSON.stringify(inputDate);
-        data["daywise_timeslot_options"] = JSON.stringify(inputDay);
+    <Form form={form} initialValues={activityData} name="control-hooks" onFinish={onFinish} style={{ width: '100%', marginTop: 100 }}>
 
-        dispatch(actions.editActivity(data, token));
-      }}
-    >
-      {({ handleSubmit }) => (
+      <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
+        <DialogContent dividers>
+          <Typography gutterBottom>
+            <b>Success</b>
+          </Typography>
+          <Typography gutterBottom style={{ marginTop: "10px" }}>
+            {addActivityStatusData}
+          </Typography>
+          <Typography gutterBottom style={{ marginTop: "10px" }}>
+            <Button autoFocus onClick={handleClose} style={{ backgroundColor: "#4ef508de", color: "white" }}>
+              Okay
+            </Button>
+          </Typography>
+        </DialogContent>
+      </Dialog>
 
-        <Form className="form form-label-right">
+      <div className="row" style={{ width: '100%' }}>
+        <div className="col-2">
+          <Checkbox style={{ float: "right" }} name="enableTimeSlots" checked={enableTimeslots} onChange={e => enableTimeSlotsChanged(e)} >Enable TimeSlots</Checkbox>
+        </div>
+        <div className="col-9">
+          <Button
+            className="mr-2"
+            type="primary"
+            style={{ float: "right" }}
+            onClick={() => handleAddFields()}
+          >
+            Add
+          </Button>
+        </div>
+      </div>
 
-          <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
-            <DialogContent dividers>
-              <Typography gutterBottom>
-                <b>Success</b>
-              </Typography>
-              <Typography gutterBottom style={{ marginTop: "10px" }}>
-                {addActivityStatusData}
-              </Typography>
-              <Typography gutterBottom style={{ marginTop: "10px" }}>
-                <Button autoFocus onClick={handleClose} style={{ backgroundColor: "#4ef508de", color: "white" }}>
-                  Okay
-                </Button>
-              </Typography>
-            </DialogContent>
-          </Dialog>
+      <div className="form-row" style={{ marginTop: "10px" }}>
+        {inputFields.map((inputField, index) => (
+          <Fragment key={index}>
+            <div className="row" style={{ width: '100%' }}>
+              <div className="col-2"></div>
+              <Input
+                name="random"
+                readOnly
+                style={{ width: '100px', height: '40px' }}
+                value={inputField.id}
+              />
+              <div className="col-2">
+                <TimePicker
+                  onChange={e => startTimeChanged(e, index)}
+                  defaultValue={moment(inputField.start_time, timeFormat)}
+                  style={{ marginLeft: 30 }}
+                />
+              </div>
 
-          <div className="row" style={{ width: '100%' }}>
-            <div className="col-1"></div>
-            <div className="col-form-label">
-              <Checkbox name="enableTimeSlots" label="Enable TimeSlots" value={enableTimeslots} onChange={e => enableTimeSlotsChanged(e)} />
+              <div className="col-2">
+                <TimePicker
+                  onChange={e => endTimeChanged(e, index)}
+                  defaultValue={moment(inputField.end_time, timeFormat)}
+                  style={{ marginLeft: -30 }}
+                />
+              </div>
+              <div className="col-2" style={{ marginLeft: 0 }}>
+                <label>
+                  <InputNumber
+                    onChange={e => adultChanged(e, index)}
+                    defaultValue={inputField.daliy_limit}
+                    min={0}
+                  />{" "}
+                  Daliy Limit
+                </label>
+              </div>
+              <div className="col-form-label">
+                <Checkbox name="enable" onChange={e => enableChanged(e, index)} checked={inputField.enable} > Enable </Checkbox>
+              </div>
+              <div className="col-form-label" style={{ marginLeft: 20 }} >
+                <span onClick={() => handleRemoveFields(index)}>
+                  <CloseCircleOutlined />
+                </span>
+              </div>
             </div>
-            <div className="col-9">
-              <button
-                className="btn btn-Tab"
-                type="button"
-                style={{ float: "right" }}
-                onClick={() => handleAddFields()}
-              >
-                Add
-              </button>
-            </div>
-          </div>
+          </Fragment>
+        ))}
+      </div>
 
-          <div className="form-row" style={{ marginTop: "10px" }}>
-            {inputFields.map((inputField, index) => (
-              <Fragment key={index}>
-                <div className="row" style={{ width: '100%' }}>
-                  <div className="col-2"></div>
-                  <input
-                    type="text"
-                    name="random"
-                    readOnly
-                    style={{ width: '60px', height: '30px' }}
-                    value={inputField.id}
-                  />
-                  <div className="col-2">
-                    <TimePicker
-                      name="start_time"
-                      onChange={e => startTimeChanged(e, index)}
-                      value={inputField.start_time}
-                    />
-                  </div>
-
-                  <div className="col-2">
-                    <TimePicker
-                      name="end_time"
-                      onChange={e => endTimeChanged(e, index)}
-                      value={inputField.end_time}
-                    />
-                  </div>
-                  <div className="col-3" style={{ marginLeft: 50 }}>
-                    <label>
-                      <NumericTextBox
-                        name="daliy_limit"
-                        onChange={e => adultChanged(e, index)}
-                        value={inputField.daliy_limit}
-                      />{" "}
-                      Daliy Limit
-                    </label>
-                  </div>
-                  <div className="col-form-label">
-                    <span className="btn btn-xs btn-icon btn-circle btn-white btn-hover-text-primary btn-shadow" style={{ backgroundColor: "#8950fc" }} onClick={() => handleRemoveFields(index)}>
-                      <i className="ki ki-bold-close icon-xs text-muted"></i>
-                    </span>
-                  </div>
-                  <div className="col-form-label">
-                    <Checkbox name="enable" label="Enable" onChange={e => enableChanged(e, index)} value={inputField.enable} />
-                  </div>
-                </div>
-
-              </Fragment>
-            ))}
-          </div>
-
-          <div className="form-group row" style={{ marginTop: '100px' }}>
-            <div className="col-2">
-              <button
-                className="btn btn-Tab"
-                type="button"
-                style={{ float: "right" }}
-                onClick={() => handleAddFieldsDate()}
-              >
-                Add Datewise Data
-              </button>
-            </div>
-            <div className="col-10"></div>
-
-          </div>
-
-          <div className="form-row" style={{ marginTop: "10px" }}>
-            {inputDate.map((inputDate, index) => (
-              <Fragment key={index}>
-                <div className="col-2"></div>
+      <div className="form-group row" style={{ marginTop: '50px' }}>
+        <div className="col-2">
+          <Button
+            className="mr-2"
+            type="primary"
+            style={{ float: "right" }}
+            onClick={() => handleAddFieldsDate()}
+          >
+            Add Datewise Data
+          </Button>
+        </div>
+        <div className="col-10 form-row">
+          {inputDate.map((inputDate, index) => (
+            <Fragment key={index}>
+              <div className="col-12 form-row" style={{ marginTop: 20 }}>
+                <div className="col-1"></div>
                 <label className=" col-form-label activity-title" style={{ marginRight: 20 }}>Start Date</label>
-                <div className="col-3">
+                <div className="col-2">
                   <DatePicker
-                    name="start-date"
                     onChange={e => startDateChanged(e, index)}
-                    value={inputDate.start_date}
+                    defaultValue={moment(inputDate.start_date, dateFormat)}
+                    format={dateFormat}
                   />
                 </div>
 
                 <label className="col-form-label activity-title" style={{ marginRight: 20 }}>End Date</label>
-                <div className="col-3">
+                <div className="col-2">
                   <DatePicker
-                    name="end-date"
                     onChange={e => endDateChanged(e, index)}
-                    value={inputDate.end_date}
+                    defaultValue={moment(inputDate.end_date, dateFormat)}
+                    format={dateFormat}
                   />
                 </div>
                 <div className="col-form-label">
-                  <span className="btn btn-xs btn-icon btn-circle btn-white btn-hover-text-primary btn-shadow" style={{ backgroundColor: "#8950fc" }} onClick={() => handleRemoveFieldsDate(index)}>
-                    <i className="ki ki-bold-close icon-xs text-muted"></i>
+                  <span onClick={() => handleRemoveFieldsDate(index)}>
+                    <CloseCircleOutlined />
                   </span>
                 </div>
                 <div className="col-2">
-                  <button
-                    className="btn btn-Tab"
-                    type="button"
+                  <Button
+                    className="mr-2"
+                    type="primary"
+                    style={{ float: "right" }}
                     onClick={() => handleAddFieldsDateTimeslots(index)}
                   >
                     Add TimeSlots
-                  </button>
+                  </Button>
                 </div>
                 {inputDate['timeslots'].map((dateTimeSlot, i) => (
                   <Fragment key={i}>
-                    <div className="row" style={{ width: '100%' }}>
-                      <div className="col-2"></div>
-                      <input
-                        type="text"
+                    <div className="row" style={{ width: '100%', marginTop: 5 }}>
+                      <Input
                         name="random"
                         readOnly
-                        style={{ width: '60px', height: '30px' }}
+                        style={{ width: '100px', height: '40px' }}
                         value={dateTimeSlot.id}
                       />
 
                       <div className="col-2">
                         <TimePicker
-                          name="start_timeslot"
                           onChange={e => startTimeSlotChanged(e, index, i)}
-                          value={dateTimeSlot.start_time}
+                          defaultValue={moment(dateTimeSlot.start_time, timeFormat)}
+                          format={timeFormat}
                         />
                       </div>
 
                       <div className="col-2">
                         <TimePicker
-                          name="end_timeslot"
                           onChange={e => endTimeSlotChanged(e, index, i)}
-                          value={dateTimeSlot.end_time}
+                          defaultValue={moment(dateTimeSlot.end_time, timeFormat)}
+                          format={timeFormat}
                         />
                       </div>
-                      <div className="col-3" style={{ marginLeft: 50 }}>
+                      <div className="col-3" style={{ marginLeft: 0 }}>
                         <label>
-                          <NumericTextBox
-                            name="adult_limitslot"
+                          <InputNumber
                             onChange={e => adultSlotChanged(e, index, i)}
-                            value={dateTimeSlot.daliy_limit}
+                            defaultValue={dateTimeSlot.daliy_limit}
+                            min={0}
                           />{" "}
                           Daliy Limit
                         </label>
                       </div>
                       <div className="col-form-label">
-                        <Checkbox name="enable" label="Enable" onChange={e => enableSlotChanged(e, index, i)} value={dateTimeSlot.enable} />
+                        <Checkbox name="enable" onChange={e => enableSlotChanged(e, index, i)} checked={dateTimeSlot.enable} >Enable</Checkbox>
                       </div>
-                      <div className="col-form-label">
-                        <span className="btn btn-xs btn-icon btn-circle btn-white btn-hover-text-primary btn-shadow" style={{ backgroundColor: "#8950fc" }} onClick={() => handleRemoveFieldsDateTimeslot(index, i)}>
-                          <i className="ki ki-bold-close icon-xs text-muted"></i>
+                      <div className="col-form-label" style={{ marginLeft: 20 }} >
+                        <span onClick={() => handleRemoveFieldsDateTimeslot(index, i)}>
+                          <CloseCircleOutlined />
                         </span>
                       </div>
                     </div>
                   </Fragment>
                 ))}
-              </Fragment>
-            ))}
-          </div>
+              </div>
+            </Fragment>
+          ))}
+        </div>
+      </div>
 
-          <div className="form-group row" style={{ marginTop: '100px' }}>
-            <div className="col-2">
-              <button
-                className="btn btn-Tab"
-                type="button"
-                style={{ float: "right" }}
-                onClick={() => handleAddFieldsDay()}
-              >
-                Add Daywise Data
-              </button>
-            </div>
-            <div className="col-10"></div>
-
-          </div>
-
-          <div className="form-row" style={{ marginTop: "10px" }}>
-            {inputDay.map((inputDay, index) => (
-              <Fragment key={index}>
-                <div className="col-2"></div>
+      <div className="form-group row" style={{ marginTop: '100px' }}>
+        <div className="col-2">
+          <Button
+            className="mr-2"
+            type="primary"
+            style={{ float: "right" }}
+            onClick={() => handleAddFieldsDay()}
+          >
+            Add Daywise Data
+          </Button>
+        </div>
+        <div className="col-10 form-row">
+          {inputDay.map((inputDay, index) => (
+            <Fragment key={index}>
+              <div className="col-12 form-row" style={{ marginTop: "20px" }}>
                 <div className="col-7">
-                  <Checkbox name="1" label="Monday" onChange={e => selectDay(e, index)} value={daySet[index].mon} />
-                  <Checkbox name="2" label="Tuseday" onChange={e => selectDay(e, index)} value={daySet[index].tues} />
-                  <Checkbox name="3" label="Wednesday" onChange={e => selectDay(e, index)} value={daySet[index].wed} />
-                  <Checkbox name="4" label="Thursday" onChange={e => selectDay(e, index)} value={daySet[index].thur} />
-                  <Checkbox name="5" label="Friday" onChange={e => selectDay(e, index)} value={daySet[index].fri} />
-                  <Checkbox name="6" label="Saturday" onChange={e => selectDay(e, index)} value={daySet[index].sat} />
-                  <Checkbox name="0" label="Sunday" onChange={e => selectDay(e, index)} value={daySet[index].sun} />
+                  <Checkbox name="1" onChange={e => selectDay(e, index)} checked={daySet[index].mon} >Monday</Checkbox>
+                  <Checkbox name="2" onChange={e => selectDay(e, index)} checked={daySet[index].tues} >Tuseday</Checkbox>
+                  <Checkbox name="3" onChange={e => selectDay(e, index)} checked={daySet[index].wed} >Wednesday</Checkbox>
+                  <Checkbox name="4" onChange={e => selectDay(e, index)} checked={daySet[index].thur} >Thursday</Checkbox>
+                  <Checkbox name="5" onChange={e => selectDay(e, index)} checked={daySet[index].fri} >Friday</Checkbox>
+                  <Checkbox name="6" onChange={e => selectDay(e, index)} checked={daySet[index].sat} >Saturday</Checkbox>
+                  <Checkbox name="0" onChange={e => selectDay(e, index)} checked={daySet[index].sun} >Sunday</Checkbox>
                 </div>
 
                 <div className="col-form-label">
-                  <span className="btn btn-xs btn-icon btn-circle btn-white btn-hover-text-primary btn-shadow" style={{ backgroundColor: "#8950fc" }} onClick={() => handleRemoveFieldsDay(index)}>
-                    <i className="ki ki-bold-close icon-xs text-muted"></i>
+                  <span onClick={() => handleRemoveFieldsDay(index)}>
+                    <CloseCircleOutlined />
                   </span>
                 </div>
                 <div className="col-2">
-                  <button
-                    className="btn btn-Tab"
-                    type="button"
-                    onClick={() => handleAddFieldsDayTimeslots(index)}
-                  >
+                  <Button className="mr-2" type="primary" style={{ float: 'right' }} onClick={() => handleAddFieldsDayTimeslots(index)} >
                     Add TimeSlots
-                  </button>
+                  </Button>
                 </div>
                 {inputDay['timeslots'].map((dateTimeSlot, i) => (
                   <Fragment key={i}>
-                    <div className="row" style={{ width: '100%' }}>
-                      <div className="col-2"></div>
-                      <input
-                        type="text"
+                    <div className="row" style={{ width: '100%', marginTop: 5 }}>
+                      <Input
                         name="random"
                         readOnly
-                        style={{ width: '60px', height: '30px' }}
+                        style={{ width: '100px', height: '40px' }}
                         value={dateTimeSlot.id}
                       />
 
                       <div className="col-2">
                         <TimePicker
-                          name="start_timeslot"
                           onChange={e => startDayTimeSlotChanged(e, index, i)}
-                          value={dateTimeSlot.start_time}
+                          defaultValue={moment(dateTimeSlot.start_time, timeFormat)}
                         />
                       </div>
 
                       <div className="col-2">
                         <TimePicker
-                          name="end_timeslot"
                           onChange={e => endDayTimeSlotChanged(e, index, i)}
-                          value={dateTimeSlot.end_time}
+                          defaultValue={moment(dateTimeSlot.end_time, timeFormat)}
                         />
                       </div>
-                      <div className="col-3" style={{ marginLeft: 50 }}>
+                      <div className="col-3" style={{ marginLeft: 0 }}>
                         <label>
-                          <NumericTextBox
-                            name="adult_limitslot"
+                          <InputNumber
                             onChange={e => adultDaySlotChanged(e, index, i)}
-                            value={dateTimeSlot.daliy_limit}
+                            defaultValue={dateTimeSlot.daliy_limit}
                           />{" "}
                           Daliy Limit
                         </label>
                       </div>
                       <div className="col-form-label">
-                        <Checkbox name="enable" label="Enable" onChange={e => enableDaySlotChanged(e, index, i)} value={dateTimeSlot.enable} />
+                        <Checkbox name="enable" onChange={e => enableDaySlotChanged(e, index, i)} checked={dateTimeSlot.enable} >Enable</Checkbox>
                       </div>
-                      <div className="col-form-label">
-                        <span className="btn btn-xs btn-icon btn-circle btn-white btn-hover-text-primary btn-shadow" style={{ backgroundColor: "#8950fc" }} onClick={() => handleRemoveFieldsDayTimeslot(index, i)}>
-                          <i className="ki ki-bold-close icon-xs text-muted"></i>
+                      <div className="col-form-label" style={{ marginLeft: 20 }} >
+                        <span onClick={() => handleRemoveFieldsDayTimeslot(index, i)}>
+                          <CloseCircleOutlined />
                         </span>
                       </div>
                     </div>
                   </Fragment>
                 ))}
-              </Fragment>
-            ))}
-          </div>
+              </div>
+            </Fragment>
+          ))}
+        </div>
+      </div>
 
-          <div className="form-group">
-            <button
-              type="submit"
-              className={`btn btn-Tab`}
-              style={{ float: "right", marginRight: 150, marginTop: 50 }}
-              onSubmit={() => handleSubmit()}
-            >Submit</button>
-          </div>
-        </Form>
-      )}
-    </Formik>
+      <Form.Item>
+        <Button className="mr-2" type="primary" htmlType="submit" style={{ float: 'right' }} >
+          Submit
+        </Button>
+      </Form.Item>
+    </Form>
   );
 }
 

@@ -1,42 +1,19 @@
 import React, { useState, useEffect, Fragment } from "react";
-import * as Yup from "yup";
-import { Field, Form, Formik } from "formik";
-import { Input } from "antd";
+import { Input, Form, Button, Checkbox, DatePicker, InputNumber } from "antd";
 import { useDispatch } from "react-redux";
 import { shallowEqual, useSelector } from "react-redux";
 import * as actions from "../../../../_redux/activities/activitiesActions";
-import { DatePicker } from "@progress/kendo-react-dateinputs";
-import { NumericTextBox } from "@progress/kendo-react-inputs";
-import { Checkbox } from "@progress/kendo-react-inputs";
+import moment from 'moment';
+import { CloseCircleOutlined, CloseOutlined } from '@ant-design/icons';
 
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
+
+const dateFormat = 'YYYY-MM-DD';
 
 function BookingLimits(props) {
-
-  const initialValues = {
-    daily_limit: 0,
-    overall_bookings_limit: 0
-  };
-
-  const Schema = Yup.object().shape({
-    daily_limit: Yup.number()
-      .min(0, "Minimum 3 symbols")
-      .max(10000000, "Maximum 50 symbols")
-      .required(
-        "The field requiered"
-      ),
-    overall_bookings_limit: Yup.number()
-      .min(0, "Minimum 3 symbols")
-      .max(10000000, "Maximum 50 symbols")
-      .required(
-        "The field requiered"
-      ),
-
-  });
 
   const dispatch = useDispatch();
   const { editId } = props;
@@ -96,22 +73,21 @@ function BookingLimits(props) {
     setInputFields(values);
   };
 
-  const startDateChanged = (event, index) => {
-    const { value } = event.target;
+  const startDateChanged = (date, index) => {
+    // const { value } = event.target;
     const list = [...inputFields];
-    list[index]['start_date'] = value;
+    list[index]['start_date'] = moment(date).format(dateFormat).toString();
     setInputFields(list);
   };
 
-  const endDateChanged = (event, index) => {
-    const { value } = event.target;
+  const endDateChanged = (date, index) => {
     const list = [...inputFields];
-    list[index]['end_date'] = value;
+    list[index]['end_date'] = moment(date).format(dateFormat).toString();
     setInputFields(list);
   };
 
-  const adultChanged = (event, index) => {
-    const { value } = event.target;
+  const adultChanged = (value, index) => {
+    // const { value } = event.target;
     const list = [...inputFields];
     list[index]['daily_limit'] = value;
     setInputFields(list);
@@ -132,8 +108,7 @@ function BookingLimits(props) {
     setInputDay(values);
   };
 
-  const adultDayChanged = (event, index) => {
-    const { value } = event.target;
+  const adultDayChanged = (value, index) => {
     const list = [...inputDay];
     list[index]['daily_limit'] = value;
     setInputDay(list);
@@ -141,17 +116,16 @@ function BookingLimits(props) {
 
   const selectDay = (event, index) => {
     const list = [...inputDay];
-    const { value } = event;
-
+    const value = event.target.checked;
     let spliceNum = -1;
     if (value) {
-      list[index]['days'].push(Number(event.target.element.name))
+      list[index]['days'].push(Number(event.target.name))
     }
     else {
-        for (var i = 0; i < list[index]['days'].length; i++) {
-        if (list[index]['days'][i] == event.target.element.name) {
+      for (var i = 0; i < list[index]['days'].length; i++) {
+        if (list[index]['days'][i] == event.target.name) {
           list[index]['days'].splice(i, 1);
-          spliceNum = event.target.element.name;
+          spliceNum = event.target.name;
         }
       }
     }
@@ -227,184 +201,158 @@ function BookingLimits(props) {
       handleClickOpen();
   }, [addActivityStatusData]);
 
+  const [form] = Form.useForm();
+  const onFinish = values => {
+    let data = {};
+    data["id"] = addActivityId;
+    data["daily_limit"] = values.daily_limit;
+    data["overall_bookings_limit"] = values.overall_bookings_limit;
+    data["datewise_booking_limits"] = JSON.stringify(inputFields);
+    data["daywise_bookinglimit_options"] = JSON.stringify(inputDay);
+
+    editActivity(JSON.stringify(data));
+  };
+
   return (
 
-    <Formik
-      enableReinitialize={true}
-      initialValues={activityData.daily_limit ? activityData : initialValues}
-      validationSchema={Schema}
-      onSubmit={(values) => {
-        let data = {};
-        data["id"] = addActivityId;
-        data["daily_limit"] = values.daily_limit;
-        data["overall_bookings_limit"] = values.overall_bookings_limit;
-        data["datewise_booking_limits"] = JSON.stringify(inputFields);
-        data["daywise_bookinglimit_options"] = JSON.stringify(inputDay);
+    <Form form={form} initialValues={activityData} name="control-hooks" onFinish={onFinish} style={{ width: '100%', marginTop: 100 }}>
 
-        editActivity(JSON.stringify(data));
-      }}
-    >
-      {({ handleSubmit }) => (
+      <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
+        <DialogContent dividers>
+          <Typography gutterBottom>
+            <b>Success</b>
+          </Typography>
+          <Typography gutterBottom style={{ marginTop: "10px" }}>
+            {addActivityStatusData}
+          </Typography>
+          <Typography gutterBottom style={{ marginTop: "10px" }}>
+            <Button autoFocus onClick={handleClose} style={{ backgroundColor: "#4ef508de", color: "white" }}>
+              Okay
+            </Button>
+          </Typography>
+        </DialogContent>
+      </Dialog>
+      <div className="row">
+        <div className="col-3"></div>
+        <div className="col-2">
+          <Form.Item name="daily_limit" label="Daily Limit" rules={[{ required: true }]}>
+            <InputNumber min={0} />
+          </Form.Item>
+        </div>
+        <div className="col-1"></div>
+        <div className="col-2">
+          <Form.Item name="overall_bookings_limit" label="Overall Limit" rules={[{ required: true }]}>
+            <InputNumber min={0} />
+          </Form.Item>
+        </div>
+        <div className="col-3"></div>
+      </div>
 
-        <Form className="form form-label-right">
-
-          <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
-            <DialogContent dividers>
-              <Typography gutterBottom>
-                <b>Success</b>
-              </Typography>
-              <Typography gutterBottom style={{ marginTop: "10px" }}>
-                {addActivityStatusData}
-              </Typography>
-              <Typography gutterBottom style={{ marginTop: "10px" }}>
-                <Button autoFocus onClick={handleClose} style={{ backgroundColor: "#4ef508de", color: "white" }}>
-                  Okay
-                </Button>
-              </Typography>
-            </DialogContent>
-          </Dialog>
-
-          <div className="form-group row" style={{ marginTop: '50px' }}>
-            <div className="col-3"></div>
-            <label className="col-form-label activity-title">Daily Limit</label>
-            <div className="col-2">
-              <Field
-                type="number"
-                name="daily_limit"
-                component={Input}
-                placeholder="enter daily limit"
-              />
-            </div>
-            <label className="col-form-label activity-title">Overall Limit</label>
-            <div className="col-2">
-              <Field
-                type="number"
-                name="overall_bookings_limit"
-                component={Input}
-                placeholder="enter overall limit"
-              />
-            </div>
-            <div className="col-3"></div>
+      <Form.Item>
+        <div className="form-group row" style={{ marginTop: '50px' }}>
+          <div className="col-2">
+            <Button
+              type="primary"
+              className="mr-2"
+              style={{ float: "right" }}
+              onClick={() => handleAddFields()}
+            >
+              Add Datewise Data
+            </Button>
           </div>
-
-          <div className="form-group row" style={{ marginTop: '100px' }}>
-            <div className="col-2">
-              <button
-                className="btn btn-Tab"
-                type="button"
-                style={{ float: "right" }}
-                onClick={() => handleAddFields()}
-              >
-                Add Datewise Data
-              </button>
-            </div>
-            <div className="col-12"></div>
-          </div>
-
-          <div className="form-row" style={{ marginTop: "10px" }}>
+          <div className="col-10 form-row" style={{ marginTop: "10px" }}>
             {inputFields.map((inputDate, index) => (
               <Fragment key={index}>
-                <div className="col-2"></div>
-                <label className=" col-form-label activity-title" style={{ marginRight: 20 }}>Start Date</label>
-                <div className="col-3">
-                  <DatePicker
-                    name="start-date"
-                    onChange={e => startDateChanged(e, index)}
-                    value={inputDate.start_date}
-                  />
-                </div>
+                <div className="col-12 form-row" style={{ marginTop: 20 }}>
+                  <div className="col-1"></div>
+                  <label className=" col-form-label activity-title" style={{ marginRight: 20 }}>Start Date</label>
+                  <div className="col-2">
+                    <DatePicker
+                      onChange={e => startDateChanged(e, index)}
+                      defaultValue={moment(inputDate.start_date, dateFormat)}
+                      format={dateFormat}
+                    />
+                  </div>
 
-                <label className="col-form-label activity-title" style={{ marginRight: 20 }}>End Date</label>
-                <div className="col-3">
-                  <DatePicker
-                    name="end-date"
-                    onChange={e => endDateChanged(e, index)}
-                    value={inputDate.end_date}
-                  />
-                </div>
-                <div className="col-form-label">
-                  <span className="btn btn-xs btn-icon btn-circle btn-white btn-hover-text-primary btn-shadow" style={{ backgroundColor: "#8950fc" }} onClick={() => handleRemoveFields(index)}>
-                    <i className="ki ki-bold-close icon-xs text-muted"></i>
-                  </span>
-                </div>
-                <div className="col-2">
-                </div>
-
-                <div className="row" style={{ width: '100%' }}>
-                  <div className="col-3"></div>
+                  <label className="col-form-label activity-title" style={{ marginRight: 20 }}>End Date</label>
+                  <div className="col-2">
+                    <DatePicker
+                      onChange={e => endDateChanged(e, index)}
+                      defaultValue={moment(inputDate.end_date, dateFormat)}
+                      format={dateFormat}
+                    />
+                  </div>
                   <div className="col-2" style={{ marginLeft: 50 }}>
                     <label>
                       Daily Adult Limit
-                      <NumericTextBox
-                        name="adult_limit"
-                        onChange={e => adultChanged(e, index)}
-                        value={inputDate.daily_limit}
-                      />{" "}
+                      <InputNumber min={0} defaultValue={inputDate.daily_limit} onChange={e => adultChanged(e, index)} />
                     </label>
                   </div>
-                  <div className="col-3"></div>
+
+                  <div className="col-form-label" style={{ marginLeft: 20 }} >
+                    <span onClick={() => handleRemoveFields(index)} >
+                      <CloseCircleOutlined />
+                    </span>
+                  </div>
+
+                  <div className="col-1">
+                  </div>
                 </div>
               </Fragment>
             ))}
           </div>
+        </div>
+      </Form.Item>
 
-          <div className="form-group row" style={{ marginTop: '100px' }}>
-            <div className="col-2">
-              <button
-                className="btn btn-Tab"
-                type="button"
-                style={{ float: "right" }}
-                onClick={() => handleAddDay()}
-              >
-                Add Daywise Data
-              </button>
-            </div>
-            <div className="col-12"></div>
+      <Form.Item>
+        <div className="form-group row" style={{ marginTop: '50px' }}>
+          <div className="col-2">
+            <Button
+              type="primary"
+              className="mr-2"
+              style={{ float: "right" }}
+              onClick={() => handleAddDay()}
+            >
+              Add Daywise Data
+            </Button>
           </div>
-          <div className="form-row" style={{ marginTop: "10px" }}>
+          <div className="col-10 form-row">
             {inputDay.map((inputDay, index) => (
               <Fragment key={index}>
-                <div className="col-2"></div>
-                <div className="col-7">
-
-                  <Checkbox name="1" label="Monday" onChange={e => selectDay(e, index)} value={daySet[index].mon} />
-                  <Checkbox name="2" label="Tuseday" onChange={e => selectDay(e, index)} value={daySet[index].tues} />
-                  <Checkbox name="3" label="Wednesday" onChange={e => selectDay(e, index)} value={daySet[index].wed} />
-                  <Checkbox name="4" label="Thursday" onChange={e => selectDay(e, index)} value={daySet[index].thur} />
-                  <Checkbox name="5" label="Friday" onChange={e => selectDay(e, index)} value={daySet[index].fri} />
-                  <Checkbox name="6" label="Saturday" onChange={e => selectDay(e, index)} value={daySet[index].sat} />
-                  <Checkbox name="0" label="Sunday" onChange={e => selectDay(e, index)} value={daySet[index].sun} />
-
-                </div>
-                <div className="col-2" style={{ marginLeft: 50 }}>
-                  <label>
-                    Daily Adult Limit
-                    <NumericTextBox
-                      onChange={e => adultDayChanged(e, index)}
-                      value={inputDay.daily_limit}
-                    />{" "}
-                  </label>
-                </div>
-                <div className="col-form-label">
-                  <span className="btn btn-xs btn-icon btn-circle btn-white btn-hover-text-primary btn-shadow" style={{ backgroundColor: "#8950fc" }} onClick={() => handleRemoveDay(index)}>
-                    <i className="ki ki-bold-close icon-xs text-muted"></i>
-                  </span>
+                <div className="col-12 form-row" style={{ marginTop: 20 }} >
+                  <div className="col-8">
+                    <Checkbox name="1" onChange={e => selectDay(e, index)} checked={daySet[index].mon} >Monday</Checkbox>
+                    <Checkbox name="2" onChange={e => selectDay(e, index)} checked={daySet[index].tues} >Tuseday</Checkbox>
+                    <Checkbox name="3" onChange={e => selectDay(e, index)} checked={daySet[index].wed} >Wednesday</Checkbox>
+                    <Checkbox name="4" onChange={e => selectDay(e, index)} checked={daySet[index].thur} >Thursday</Checkbox>
+                    <Checkbox name="5" onChange={e => selectDay(e, index)} checked={daySet[index].fri} >Friday</Checkbox>
+                    <Checkbox name="6" onChange={e => selectDay(e, index)} checked={daySet[index].sat} >Saturday</Checkbox>
+                    <Checkbox name="0" onChange={e => selectDay(e, index)} checked={daySet[index].sun} >Sunday</Checkbox>
+                  </div>
+                  <div className="col-2">
+                    <label>
+                      Daily Adult Limit
+                      <InputNumber min={0} defaultValue={inputDay.daily_limit} onChange={e => adultDayChanged(e, index)} />
+                    </label>
+                  </div>
+                  <div className="col-form-label" style={{ marginLeft: 20 }} >
+                    <span onClick={() => handleRemoveDay(index)}>
+                      <CloseCircleOutlined />
+                    </span>
+                  </div>
                 </div>
               </Fragment>
             ))}
           </div>
+        </div>
+      </Form.Item>
 
-          <div className="form-group">
-            <button
-              type="submit"
-              className={`btn btn-Tab`}
-              style={{ float: "right" }}
-              onSubmit={() => handleSubmit()}
-            >Submit</button>
-          </div>
-        </Form>
-      )}
-    </Formik>
+      <Form.Item>
+        <Button className="mr-2" type="primary" htmlType="submit" style={{ float: 'right' }} >
+          Submit
+        </Button>
+      </Form.Item>
+    </Form>
   );
 }
 

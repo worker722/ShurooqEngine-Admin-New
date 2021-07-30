@@ -37,8 +37,8 @@ function BasicForm(props) {
 
   const [form] = Form.useForm();
   const onFinish = values => {
-    values["id"] = radValue;
-    values["activity_type"] = addActivityId;
+    values["id"] = addActivityId;
+    values["activity_type"] = radValue;
     values["vendor_id"] = selectVal;
     editActivity(JSON.stringify(values));
   };
@@ -156,7 +156,6 @@ function BasicInfo(props) {
     }),
     shallowEqual
   );
-
   return (
     <div>
       {(activityData && load == 1) ? (

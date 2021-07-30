@@ -95,7 +95,12 @@ const UserList = () => {
 
 	const dispatch = useDispatch();
 	const history = useHistory();
-
+    const [load, setLoad] = useState(0);
+	const token = useSelector(({ auth }) => auth.authToken, shallowEqual);
+	useEffect(() => {
+		dispatch(actions.getUserLists(token));
+		setLoad(1);
+	}, []);
 	const { userListData } = useSelector(
 		(state) => ({
 			userListData: state.users.userListData,
@@ -103,14 +108,9 @@ const UserList = () => {
 		shallowEqual
 	);
 
-	const token = useSelector(({ auth }) => auth.authToken, shallowEqual);
-	useEffect(() => {
-		dispatch(actions.getUserLists(token));
-	}, []);
-
 	return (
 		<div>
-			{userListData && <ListForm userListData={userListData} />}
+			{userListData && load == 1 && <ListForm userListData={userListData} />}
 		</div>
 	)
 }

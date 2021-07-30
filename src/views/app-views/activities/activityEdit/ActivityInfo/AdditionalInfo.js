@@ -1,62 +1,32 @@
 import React, { useState, Component, Fragment, useEffect } from "react";
 import * as Yup from "yup";
-import { Field, Form, Formik } from "formik";
-import { DatePicker, DatePickerField, Input, Select } from "antd";
+import { Button, Form, Input, Select } from "antd";
 import { useDispatch } from "react-redux";
 import { shallowEqual, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap-daterangepicker/daterangepicker.css';
-import Checkbox from '@material-ui/core/Checkbox';
 import * as actions from "../../../../_redux/activities/activitiesActions";
 
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
 
-function AdditionalInfo(props) {
+const { Option } = Select;
 
-    const initialValues = {
-        contact_details: "",
-        out_of_stock_message: "",
-        max_allowed_tickets_per_booking: "",
-    };
+const layout = {
+    labelCol: { span: 8 },
+    wrapperCol: { span: 16 },
+};
+const tailLayout = {
+    wrapperCol: { offset: 8, span: 16 },
+};
 
-    const Schema = Yup.object().shape({
-        contact_details: Yup.string()
-            .required(
-                "The field requiered"
-            ),
-        out_of_stock_message: Yup.string()
-            .required(
-                "The field requiered"
-            ),
-        max_allowed_tickets_per_booking: Yup.string()
-            .required(
-                "The field requiered"
-            ),
-    });
+function AddInfoForm(props) {
+
+    const { activityData, addActivityStatusData, addActivityId, linkedActivityList, inputData, setInputData } = props;
     const token = useSelector(({ auth }) => auth.authToken, shallowEqual);
     const history = useHistory();
-    const { addActivityId, activityData, addActivityStatusData, linkedActivityList } = useSelector(
-        (state) => ({
-            addActivityId: state.activities.addActivityId,
-            activityData: state.activities.activityData,
-            addActivityStatusData: state.activities.addActivityStatusData,
-            linkedActivityList: state.activities.linkedActivityList,
-        }),
-        shallowEqual
-    );
-
     const dispatch = useDispatch();
-    const { editId } = props;
-
-    useEffect(() => {
-        dispatch(actions.getIdData(editId, token));
-        dispatch(actions.getLinkedActivities(token));
-    }, []);
 
     ////////dialog///////
     const DialogContent = withStyles((theme) => ({
@@ -81,27 +51,10 @@ function AdditionalInfo(props) {
     }, [addActivityStatusData]);
     //////////////////////////////////////
 
-    useEffect(() => {
-        // console.log(activityData.linked_activity_id)
-        const linkId = activityData.linked_activity_id;
-        if(linkId != null)
-        {
-            const list = [...inputData];
-            list['linked_activity_id'] = linkId;
-            list['max_allowed_tickets_per_booking'] = activityData.max_allowed_tickets_per_booking;
-            list['out_of_stock_message'] = activityData.out_of_stock_message;
-            list['contact_details'] = activityData.contact_details;
-    
-            setInputData(list);
-        }
-        
-    }, [activityData]);
-
     const [linkedActivityData, setLinkedActivityData] = useState([]);
     useEffect(() => {
         let lstLinkData = [];
-        for(var i = 0; i < linkedActivityList.length; i++)
-        {
+        for (var i = 0; i < linkedActivityList.length; i++) {
             let data = {};
             data["id"] = linkedActivityList[i].id;
             data["name"] = JSON.parse(linkedActivityList[i].linked_activties)[0].name;
@@ -110,118 +63,125 @@ function AdditionalInfo(props) {
         setLinkedActivityData(lstLinkData);
     }, [linkedActivityList]);
 
-    const [inputData, setInputData] = useState([]);
-    const handleIdChange = (event) => {
-        const { value } = event.target;
+    const handleIdChange = (value) => {
         const list = [...inputData];
         list['linked_activity_id'] = value;
 
         setInputData(list);
     }
 
+    const [form] = Form.useForm();
+    const onFinish = values => {
+        let data = {};
+        data["id"] = addActivityId;
+        data["max_allowed_tickets_per_booking"] = values.max_allowed_tickets_per_booking;
+        data["contact_details"] = values.contact_details;
+        data["out_of_stock_message"] = values.out_of_stock_message;
+        data["linked_activity_id"] = inputData["linked_activity_id"];
+
+        dispatch(actions.editActivity(JSON.stringify(data), token));
+    };
+
     return (
+        <Form {...layout} form={form} initialValues={activityData} name="control-hooks" onFinish={onFinish} style={{ width: '50%', marginLeft: '17%', marginTop: 100 }}>
+            <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
+                <DialogContent dividers>
+                    <Typography gutterBottom>
+                        <b>Success</b>
+                    </Typography>
+                    <Typography gutterBottom style={{ marginTop: "10px" }}>
+                        {addActivityStatusData}
+                    </Typography>
+                    <Typography gutterBottom style={{ marginTop: "10px" }}>
+                        <Button autoFocus onClick={handleClose} style={{ backgroundColor: "#4ef508de", color: "white" }}>
+                            Okay
+                        </Button>
+                    </Typography>
+                </DialogContent>
+            </Dialog>
 
-        <Formik
-            enableReinitialize={true}
-            initialValues={activityData ? activityData : initialValues}
-            validationSchema={Schema}
-            onSubmit={(values) => {
-                let data = {};
-                data["id"] = editId;
-                data["max_allowed_tickets_per_booking"] = values.max_allowed_tickets_per_booking;
-                data["contact_details"] = values.contact_details;
-                data["out_of_stock_message"] = values.out_of_stock_message;
-                data["linked_activity_id"] = inputData["linked_activity_id"];
+            <Form.Item name="max_allowed_tickets_per_booking" label="Max allowed Tickets" rules={[{ required: true }]}>
+                <Input />
+            </Form.Item>
 
-                dispatch(actions.editActivity(JSON.stringify(data), token));
-            }}
-        >
-            {({ handleSubmit }) => (
+            <Form.Item name="contact_details" label="Contact Details" rules={[{ required: true }]}>
+                <Input />
+            </Form.Item>
 
-                <Form className="form form-label-right">
+            <Form.Item name="out_of_stock_message" label="Out of Stock Message" rules={[{ required: true }]}>
+                <Input />
+            </Form.Item>
 
-                    <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
-                        <DialogContent dividers>
-                            <Typography gutterBottom>
-                                <b>Success</b>
-                            </Typography>
-                            <Typography gutterBottom style={{ marginTop: "10px" }}>
-                                {addActivityStatusData}
-                            </Typography>
-                            <Typography gutterBottom style={{ marginTop: "10px" }}>
-                                <Button autoFocus onClick={handleClose} style={{ backgroundColor: "#4ef508de", color: "white" }}>
-                                    Okay
-                                </Button>
-                            </Typography>
-                        </DialogContent>
-                    </Dialog>
+            <Form.Item label="Linked Activities" rules={[{ required: true }]}>
+                <Select
+                    placeholder="Select a option"
+                    defaultValue={inputData["linked_activity_id"]}
+                    onChange={handleIdChange}
+                    allowClear
+                >
+                    <Option value="0"></Option>
+                    {linkedActivityData?.map((activity, index) => {
+                        return (
+                            <Option key={index + 1} value={activity.id}>{activity.name}</Option>
+                        )
+                    })}
+                </Select>
+            </Form.Item>
 
-                    <div className="form-group row">
-                        <div className="col-lg-2"></div>
-                        <div className="col-lg-8">
-                            <div className="row" style={{ marginTop: '50px' }}>
-                                <div className="col-2"></div>
-                                <label className="col-2 col-form-label activity-title">Max allowed Tickets</label>
-                                <div className="col-6">
-                                    <Field
-                                        name="max_allowed_tickets_per_booking"
-                                        component={Input}
-                                        placeholder=""
-                                    />
-                                </div>
-                            </div>
-                            <div className="row" style={{ marginTop: '50px' }}>
-                                <div className="col-2"></div>
-                                <label className="col-2 col-form-label activity-title">Contact Details</label>
-                                <div className="col-6">
-                                    <Field
-                                        name="contact_details"
-                                        component={Input}
-                                        placeholder=""
-                                    />
-                                </div>
-                            </div>
-                            <div className="row" style={{ marginTop: '50px' }}>
-                                <div className="col-2"></div>
-                                <label className="col-2 col-form-label activity-title">Out of Stock Message</label>
-                                <div className="col-6">
-                                    <Field
-                                        name="out_of_stock_message"
-                                        component={Input}
-                                        placeholder=""
-                                    />
-                                </div>
-                            </div>
-                            <div className="row" style={{ marginTop: '50px' }}>
-                                <div className="col-2"></div>
-                                <label className="col-2 col-form-label activity-title">Linked Activities</label>
-                                <div className="col-6">
-                                    <Select name="enable" style={{ width: "auto" }} value={inputData["linked_activity_id"]} onChange={e => handleIdChange(e)}>
-                                        <option key={0} value={0}></option>
-                                        {linkedActivityData?.map((activity, index) => {
-                                            return (
-                                                <option key={index} value={activity.id}>{activity.name}</option>
-                                            )
-                                        })}
-                                    </Select>
-                                </div>
-                            </div>
+            <Form.Item {...tailLayout}>
+                <Button className="mr-2" type="primary" htmlType="submit" style={{ float: 'right' }} >
+                    Submit
+                </Button>
+            </Form.Item>
+        </Form >
+    )
 
-                        </div>
-                        <div className="col-lg-2"></div>
-                    </div>
-                    <div className="form-group">
-                        <div className="col-10"></div>
-                        <button
-                            type="submit"
-                            className={`btn btn-Tab`}
-                            style={{ float: "right" }}
-                            onSubmit={() => handleSubmit()}
-                        >Submit</button>
-                    </div>
-                </Form>
-            )}
-        </Formik>
+}
+
+function AdditionalInfo(props) {
+    const [load, setLoad] = useState(0);
+    const token = useSelector(({ auth }) => auth.authToken, shallowEqual);
+    const history = useHistory();
+    const { addActivityId, activityData, addActivityStatusData, linkedActivityList } = useSelector(
+        (state) => ({
+            addActivityId: state.activities.addActivityId,
+            activityData: state.activities.activityData,
+            addActivityStatusData: state.activities.addActivityStatusData,
+            linkedActivityList: state.activities.linkedActivityList,
+        }),
+        shallowEqual
+    );
+
+    const dispatch = useDispatch();
+    const { editId } = props;
+    const [inputData, setInputData] = useState([]);
+
+    useEffect(() => {
+        dispatch(actions.getIdData(editId, token));
+        dispatch(actions.getLinkedActivities(token));
+        setLoad(1);
+    }, []);
+
+    useEffect(() => {
+        const linkId = activityData.linked_activity_id;
+        if (linkId != null) {
+            const list = [...inputData];
+            list['linked_activity_id'] = linkId;
+            list['max_allowed_tickets_per_booking'] = activityData.max_allowed_tickets_per_booking;
+            list['out_of_stock_message'] = activityData.out_of_stock_message;
+            list['contact_details'] = activityData.contact_details;
+
+            setInputData(list);
+        }
+
+    }, [activityData]);
+    return (
+        <div>
+            {(activityData && load == 1 && inputData) ? (
+                <AddInfoForm activityData={activityData} addActivityStatusData={addActivityStatusData} addActivityId={addActivityId} linkedActivityList={linkedActivityList} inputData={inputData} setInputData={setInputData} />
+            ) :
+                (<div></div>)}
+        </div>
     );
 }
 

@@ -18,31 +18,9 @@ const tailLayout = {
 	wrapperCol: { offset: 8, span: 16 },
 };
 
-function EditForm(props) {
-	const { userData } = props;
-	const [form] = Form.useForm();
-	const onFinish = values => {
-		let data = {};
-		data["username"] = values["username"];
-		data["role"] = values["role"];
-		data["password"] = values["password"];
-		data["id"] = userData.id;
-	
-		addUser(JSON.stringify(data));
-	};
+function NewForm(props) {
 
-	const token = useSelector(({ auth }) => auth.authToken, shallowEqual);
-	const history = useHistory();
-	const dispatch = useDispatch();
-
-	const addUser = (values) => {
-		dispatch(actions.addUser(values, token)).then(() => backToUserList());
-	};
-
-	const backToUserList = () => {
-		history.push("/app/add-user");
-	};
-
+	const { userData, form, onFinish, handleChange, selectVal, setSelectVal, selectValue } = props;
 	return (
 		<Form  {...layout} initialValues={userData} form={form} name="control-hooks" onFinish={onFinish}>
 			<Form.Item name="username" label="User Name" rules={[{ required: true }]}>
@@ -69,14 +47,15 @@ function EditForm(props) {
 				]}>
 				<Input.Password />
 			</Form.Item>
-			<Form.Item name="role" label="Role" rules={[{ required: true }]}>
+			<Form.Item label="Role" rules={[{ required: true }]}>
 				<Select
 					placeholder="Select a option and change input text above"
-					// onChange={onGenderChange}
+					defaultValue={selectValue}
+					onChange={handleChange}
 					allowClear
 				>
-					<Option value="Super Admin">Super Admin</Option>
-					<Option value="Vendor">Vendor</Option>
+					<Option value="1">Super Admin</Option>
+					<Option value="2">Vendor</Option>
 				</Select>
 			</Form.Item>
 			<Form.Item {...tailLayout}>
@@ -85,6 +64,51 @@ function EditForm(props) {
 				</Button>
 			</Form.Item>
 		</Form>
+	)
+}
+
+function EditForm(props) {
+	const { userData } = props;
+	const [form] = Form.useForm();
+	const [load, setLoad] = useState(0);
+	const onFinish = values => {
+		let data = {};
+		data["username"] = values["username"];
+		data["role"] = selectVal;
+		data["password"] = values["password"];
+		data["id"] = userData.id;
+
+		addUser(JSON.stringify(data));
+	};
+
+	const selectValue = userData?.role.toString();
+	useEffect(() => {
+		setSelectVal(selectValue)
+		setLoad(1);
+	}, [userData]);
+	const token = useSelector(({ auth }) => auth.authToken, shallowEqual);
+	const history = useHistory();
+	const dispatch = useDispatch();
+
+	const addUser = (values) => {
+		dispatch(actions.addUser(values, token)).then(() => gotoList());
+	};
+
+	const gotoList = () => {
+		dispatch(actions.setUserData()).then(() => history.push("/app/add-user"));
+	}
+	const [selectVal, setSelectVal] = useState(1);
+	function handleChange(value) {
+		setSelectVal(value);
+	}
+
+	return (
+		<div>
+			{(userData && load == 1) ? (
+				<NewForm userData={userData} form={form} onFinish={onFinish} selectValue={selectValue} setSelectVal={setSelectVal} selectVal={selectVal} handleChange={handleChange} />
+			) :
+				(<div></div>)}
+		</div>
 	)
 }
 
@@ -97,6 +121,7 @@ const UserCreate = ({
 	const token = useSelector(({ auth }) => auth.authToken, shallowEqual);
 	const history = useHistory();
 	const dispatch = useDispatch();
+	const [load, setLoad] = useState(0);
 	const { userData } = useSelector(
 		(state) => ({
 			userData: state.users.userData,
@@ -104,22 +129,20 @@ const UserCreate = ({
 		shallowEqual
 	);
 	useEffect(() => {
-		if (id != null)
+		if (id != null) {
 			dispatch(actions.getUserData(id, token));
+			setLoad(1);
+		}
 		else
-		    dispatch(actions.setUserData(token));
+			dispatch(actions.setUserData());
 	}, [id]);
 
 	const addUser = (values) => {
-		dispatch(actions.addUser(values, token)).then(() => backToUserList());
-	};
-
-	const backToUserList = () => {
-		history.push("/app/add-user");
-	};
+		dispatch(actions.addUser(values, token)).then(() => gotoList());
+	};;
 
 	const gotoList = () => {
-		history.goBack();
+		dispatch(actions.setUserData()).then(() => history.push("/app/add-user"));
 	}
 
 	const [form] = Form.useForm();
@@ -193,7 +216,7 @@ const UserCreate = ({
 						</Form.Item>
 					</Form>
 				}
-				{id != 0 && userData && <EditForm userData={userData} />}
+				{id != 0 && userData && load == 1 && <EditForm userData={userData} />}
 			</div>
 		</Card>
 	)

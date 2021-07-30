@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import * as Yup from "yup";
-import { Form, Formik } from "formik";
+import { Form, Button, Checkbox } from "antd";
 import { useDispatch } from "react-redux";
 import { shallowEqual, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -9,23 +8,13 @@ import 'bootstrap-daterangepicker/daterangepicker.css';
 import { Grid, GridColumn as Column } from "@progress/kendo-react-grid";
 import * as actions from "../../../../_redux/activities/activitiesActions";
 import { process } from "@progress/kendo-data-query";
-import { Checkbox } from "@progress/kendo-react-inputs";
 
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
 
 function Transport(props) {
-
-  const initialValues = {
-
-  };
-
-  const Schema = Yup.object().shape({
-
-  });
 
   const initialDataState = {
     sort: [
@@ -100,7 +89,8 @@ function Transport(props) {
   }, [transportData]);
 
   const enableChanged = (props, event) => {
-    const { value } = event;
+    console.log(props, event)
+    const value = event.target.checked;
     const list = [...enabledList];
     if (value) {
       list.push(props.dataItem.id)
@@ -125,7 +115,7 @@ function Transport(props) {
   const [enableMeals, setEnableMeals] = React.useState(0);
 
   const enableMealsChanged = (event) => {
-    const { value } = event;
+    const value = event.target.checked;
     setEnableMeals(value)
   };
 
@@ -158,91 +148,90 @@ function Transport(props) {
       handleClickOpen();
   }, [addActivityStatusData]);
 
+  const [form] = Form.useForm();
+  const onFinish = values => {
+    let data = {};
+    data["id"] = addActivityId;
+    data["transport_options"] = JSON.stringify(enabledList);
+    data["transport"] = enableMeals;
+
+    dispatch(actions.editActivity(data, token));
+  };
+
+
   return (
 
-    <Formik
-      enableReinitialize={true}
-      initialValues={initialValues}
-      validationSchema={Schema}
-      onSubmit={(values) => {
-        let data = {};
-        data["id"] = addActivityId;
-        data["transport_options"] = JSON.stringify(enabledList);
-        data["transport"] = enableMeals;
+    <Form form={form} initialValues={activityData} name="control-hooks" onFinish={onFinish} style={{ marginTop: 100 }}>
 
-        dispatch(actions.editActivity(data, token));
-      }}
-    >
-      {({ handleSubmit }) => (
+      <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
+        <DialogContent dividers>
+          <Typography gutterBottom>
+            <b>Success</b>
+          </Typography>
+          <Typography gutterBottom style={{ marginTop: "10px" }}>
+            {addActivityStatusData}
+          </Typography>
+          <Typography gutterBottom style={{ marginTop: "10px" }}>
+            <Button autoFocus onClick={handleClose} style={{ backgroundColor: "#4ef508de", color: "white" }}>
+              Okay
+            </Button>
+          </Typography>
+        </DialogContent>
+      </Dialog>
 
-        <Form className="form form-label-right">
-
-          <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
-            <DialogContent dividers>
-              <Typography gutterBottom>
-                <b>Success</b>
-              </Typography>
-              <Typography gutterBottom style={{ marginTop: "10px" }}>
-                {addActivityStatusData}
-              </Typography>
-              <Typography gutterBottom style={{ marginTop: "10px" }}>
-                <Button autoFocus onClick={handleClose} style={{ backgroundColor: "#4ef508de", color: "white" }}>
-                  Okay
-                </Button>
-              </Typography>
-            </DialogContent>
-          </Dialog>
-
-          <div className="form-group row">
-            <div className="col-2"></div>
-            <Checkbox name="enableMeals" label="Enable Transports" value={enableMeals} onChange={e => enableMealsChanged(e)} />
+      <Form.Item>
+        <div className="form-group row">
+          <div className="col-2"></div>
+          <Checkbox name="enableMeals" checked={enableMeals} onChange={e => enableMealsChanged(e)} >Enable Transports</Checkbox>
+        </div>
+      </Form.Item>
+      <Form.Item>
+        <div className="form-group row">
+          <div className="col-2"></div>
+          <div className="col-8">
+            <Grid
+              pageable={true}
+              sortable={true}
+              // filterable={true}
+              style={{
+                height: "auto",
+              }}
+              data={process(realData || [], dataState)}
+              {...dataState}
+              onDataStateChange={(e) => {
+                setDataState(e.dataState);
+              }}
+            >
+              <Column field="id" title="Id" width="80px" filterable={false} />
+              <Column field="transport_name" title="Transport Name" />
+              <Column field="oneway_price" title="OneWay Price" />
+              <Column field="twoway_price" title="TwoWay Price" />
+              <Column field="enabled" title="Enabled"
+                cell={(props) => (
+                  <td>
+                    <Checkbox
+                      checked={props.dataItem.enabled}
+                      onChange={e => enableChanged(props, e)}
+                    ></Checkbox>
+                  </td>
+                )}
+              />
+            </Grid>
           </div>
-          <div className="form-group row">
-            <div className="col-2"></div>
-            <div className="col-8">
-              <Grid
-                pageable={true}
-                sortable={true}
-                filterable={true}
-                style={{
-                  height: "auto",
-                }}
-                data={process(realData || [], dataState)}
-                {...dataState}
-                onDataStateChange={(e) => {
-                  setDataState(e.dataState);
-                }}
-              >
-                <Column field="id" title="Id" width="80px" filterable={false} />
-                <Column field="transport_name" title="Transport Name" />
-                <Column field="oneway_price" title="OneWay Price" />
-                <Column field="twoway_price" title="TwoWay Price" />
-                <Column field="enabled" title="Enabled"
-                  cell={(props) => (
-                    <td>
-                      <Checkbox
-                        value={props.dataItem.enabled}
-                        onChange={e => enableChanged(props, e)}
-                      />
-                    </td>
-                  )}
-                />
-              </Grid>
-            </div>
-            <div className="col-2"></div>
-          </div>
+          <div className="col-2"></div>
+        </div>
+      </Form.Item>
 
-          <div className="form-group">
-            <button
-              type="submit"
-              className={`btn btn-Tab`}
-              style={{ float: "right", marginRight: 200, marginTop: 30 }}
-              onSubmit={() => handleSubmit()}
-            >Submit</button>
+      <Form.Item>
+        <div className="form-group row">
+          <div className="col-10" >
+            <Button className="mr-2" type="primary" htmlType="submit" style={{ float: 'right' }} >
+              Submit
+            </Button>
           </div>
-        </Form>
-      )}
-    </Formik>
+        </div>
+      </Form.Item>
+    </Form>
   );
 }
 

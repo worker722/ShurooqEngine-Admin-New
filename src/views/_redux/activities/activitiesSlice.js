@@ -130,7 +130,7 @@ export const activitiesSlice = createSlice({
         getLinkedActivitiesDataFetched: (state, action) => {
             state.actionsLoading = false;
             state.linkedActivityList = action.payload.statusData;
-            state.addActivityId = 0;
+            // state.addActivityId = 0;
             state.error = null;
         },
 

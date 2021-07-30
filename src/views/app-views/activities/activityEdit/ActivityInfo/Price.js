@@ -1,29 +1,25 @@
 import React, { useState, useEffect, useRef, Fragment } from "react";
-import * as Yup from "yup";
-import { Field, Form, Formik } from "formik";
 import { useDispatch } from "react-redux";
 import { shallowEqual, useSelector } from "react-redux";
 import * as actions from "../../../../_redux/activities/activitiesActions";
-import { Checkbox } from "@progress/kendo-react-inputs";
-import { NumericTextBox } from "@progress/kendo-react-inputs";
 import { Grid, GridColumn as Column } from "@progress/kendo-react-grid";
 import { process } from "@progress/kendo-data-query";
-import { DatePicker } from "@progress/kendo-react-dateinputs";
-import { Input, Select } from "antd";
+import { Input, Select, Button, Checkbox, DatePicker, Form, InputNumber } from "antd";
 import { BsFillInfoCircleFill } from 'react-icons/bs';
 import ReactTooltip from "react-tooltip";
+import { CloseCircleOutlined } from '@ant-design/icons';
+import moment from 'moment';
+import { NumericTextBox } from "@progress/kendo-react-inputs";
 
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
+
+const { Option } = Select;
+const dateFormat = 'YYYY-MM-DD';
 
 function Price(props) {
-  const initialValues = {
-  };
-  const Schema = Yup.object().shape({
-  });
 
   const initialDataState = {
     sort: [
@@ -210,17 +206,15 @@ function Price(props) {
     }]);
   };
 
-  const startDateChanged = (event, index) => {
-    const { value } = event.target;
+  const startDateChanged = (date, index) => {
     const list = [...inputDate];
-    list[index]['start_date'] = value;
+    list[index]['start_date'] = moment(date).format(dateFormat).toString();
     setInputDate(list);
   };
 
-  const endDateChanged = (event, index) => {
-    const { value } = event.target;
+  const endDateChanged = (date, index) => {
     const list = [...inputDate];
-    list[index]['end_date'] = value;
+    list[index]['end_date'] = moment(date).format(dateFormat).toString();
     setInputDate(list);
   };
 
@@ -230,6 +224,16 @@ function Price(props) {
     setInputDate(values);
   };
 
+  // const percentChanged = (value, props, index) => {
+  //   const list1 = [...inputDate];
+  //   for (var k = 0; k < list1[index]['pricing'].length; k++) {
+  //     list1[index]['pricing'][props.dataIndex]['sale_percent'] = value;
+  //     for (var j = 0; j < list1[index]['pricing'][props.dataIndex].published_price.length; j++) {
+  //       list1[index]['pricing'][props.dataIndex].published_price[j].price = (value + 1) * list1[index]['pricing'][props.dataIndex].published_price[j].markup_price;
+  //     }
+  //   }
+  //   setInputDate(list1);
+  // }
   const percentChanged = (props, event, index) => {
     const { value } = event.target;
     const list1 = [...inputDate];
@@ -256,6 +260,16 @@ function Price(props) {
     setInputDay(values);
   };
 
+  // const percentDayChanged = (value, props, index) => {
+  //   const list1 = [...inputDay];
+  //   for (var k = 0; k < list1[index]['pricing'].length; k++) {
+  //     list1[index]['pricing'][props.dataIndex]['sale_percent'] = value;
+  //     for (var j = 0; j < list1[index]['pricing'][props.dataIndex].published_price.length; j++) {
+  //       list1[index]['pricing'][props.dataIndex].published_price[j].price = (value + 1) * list1[index]['pricing'][props.dataIndex].published_price[j].markup_price;
+  //     }
+  //   }
+  //   setInputDay(list1);
+  // }
   const percentDayChanged = (props, event, index) => {
     const { value } = event.target;
     const list1 = [...inputDay];
@@ -268,18 +282,28 @@ function Price(props) {
     setInputDay(list1);
   }
 
-  const handleDayChanged = (event, index) => {
-    const { value } = event.target;
+  const handleDayChanged = (value, index) => {
     const list = [...inputDay];
     list[index]['day'] = value;
     setInputDay(list);
   };
 
   ///////////////////////////////////////////////////////////////////////////////
-  const priceChangedF = (props, event) => {
 
-  }
-
+  // const percentChangedF = (value, props) => {
+  //   const list = [...platList];
+  //   for (var i = 0; i < list.length; i++) {
+  //     if (list[i].Platform_id == props.dataItem.Platform_id) {
+  //       list[i].Sale_percent = value;
+  //       if (list[i].Published_price.length > 0) {
+  //         for (var j = 0; j < list[i].Published_price.length; j++) {
+  //           list[i].Published_price[j].price = (value + 1) * list[i].Published_price[j].markup_price;
+  //         }
+  //       }
+  //     }
+  //   }
+  //   setPlatList(list);
+  // }
   const percentChangedF = (props, event) => {
     const list = [...platList];
     for (var i = 0; i < list.length; i++) {
@@ -315,80 +339,175 @@ function Price(props) {
       handleClickOpen();
   }, [addActivityStatusData]);
 
+  const [form] = Form.useForm();
+  const onFinish = values => {
+    let data = {};
+    data["id"] = addActivityId;
+    data["platforms_pricing_options"] = JSON.stringify(platList);
+
+    data["datewise_platform_pricing_options"] = JSON.stringify(inputDate);
+    data["daywise_platform_pricing_options"] = JSON.stringify(inputDay);
+
+    dispatch(actions.editActivity(data, token));
+  };
+
+
   return (
+    <Form form={form} initialValues={activityData} name="control-hooks" onFinish={onFinish} style={{ width: '100%', marginTop: 100 }}>
 
-    <Formik
-      enableReinitialize={true}
-      initialValues={initialValues}
-      validationSchema={Schema}
-      onSubmit={(values) => {
-        let data = {};
-        data["id"] = addActivityId;
-        data["platforms_pricing_options"] = JSON.stringify(platList);
+      <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
+        <DialogContent dividers>
+          <Typography gutterBottom>
+            <b>Success</b>
+          </Typography>
+          <Typography gutterBottom style={{ marginTop: "10px" }}>
+            {addActivityStatusData}
+          </Typography>
+          <Typography gutterBottom style={{ marginTop: "10px" }}>
+            <Button autoFocus onClick={handleClose} style={{ backgroundColor: "#4ef508de", color: "white" }}>
+              Okay
+            </Button>
+          </Typography>
+        </DialogContent>
+      </Dialog>
 
-        data["datewise_platform_pricing_options"] = JSON.stringify(inputDate);
-        data["daywise_platform_pricing_options"] = JSON.stringify(inputDay);
+      <div className="form-group row">
+        <div className="col-2"></div>
+        <div className="col-8">
+          <Grid
+            pageable={true}
+            sortable={true}
+            // filterable={true}
+            style={{
+              height: "auto",
+            }}
+            data={process(platList || [], dataState)}
+            {...dataState}
+            onDataStateChange={(e) => {
+              setDataState(e.dataState);
+            }}
+          >
+            <Column field="Platform_id" title="Id" width="80px" hidden={true} />
+            <Column field="Platform_name" title="Platform Name" />
+            {ticketData.map((ticketData, index) => (
+              <Column field="Published_price" title={ticketData.ticket_name} key={index}
+                cell={(props) => (
+                  <td>
+                    <Input
+                      readOnly
+                      value={props.dataItem.Published_price[index].price}
+                      style={{ width: '80px' }}
+                    />
+                    <BsFillInfoCircleFill style={{ marginLeft: '5px' }} data-tip={"Markup Price: AED" + props.dataItem.Published_price[index].markup_price + ", Sale Price: AED" + props.dataItem.Published_price[index].price + ", You Get: AED" + props.dataItem.Published_price[index].price * (100 - vendorData) / 100} />
+                    <ReactTooltip />
+                  </td>
+                )} />
+            ))}
 
-        dispatch(actions.editActivity(data, token));
-      }}
-    >
-      {({ handleSubmit }) => (
+            < Column field="Sale_percentage" title="Sale Percentage"
+              cell={(props) => (
+                <td>
+                  <NumericTextBox
+                    format="p"
+                    max={1}
+                    min={0}
+                    step={0.01}
+                    value={props.dataItem.Sale_percent}
+                    onChange={e => percentChangedF(props, e)}
+                  />
+                  {/* <InputNumber
+                    min={0}
+                    max={100}
+                    formatter={value => `${value}%`}
+                    parser={value => value.replace('%', '')}
+                    defalutvalue={props.dataItem.Sale_percent}
+                    onChange={e => percentChangedF(e, props)}
+                  /> */}
+                </td>
+              )}
+            />
+          </Grid>
+        </div>
+        <div className="col-2"></div>
+      </div>
 
-        <Form className="form form-label-right">
+      <div className="form-group row" style={{ marginTop: '100px' }}>
+        <div className="col-2">
+          <Button
+            className="mr-2"
+            type="primary"
+            style={{ float: "right" }}
+            onClick={() => handleAddFieldsDate()}
+          >
+            Add Datewise Data
+          </Button>
+        </div>
+        <div className="col-10"></div>
 
-          <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
-            <DialogContent dividers>
-              <Typography gutterBottom>
-                <b>Success</b>
-              </Typography>
-              <Typography gutterBottom style={{ marginTop: "10px" }}>
-                {addActivityStatusData}
-              </Typography>
-              <Typography gutterBottom style={{ marginTop: "10px" }}>
-                <Button autoFocus onClick={handleClose} style={{ backgroundColor: "#4ef508de", color: "white" }}>
-                  Okay
-                </Button>
-              </Typography>
-            </DialogContent>
-          </Dialog>
+      </div>
 
-          <div className="form-group row">
+      {inputDate.map((inputDate1, index) => (
+        <Fragment key={index}>
+          <div className="form-row" style={{ marginTop: "15px" }}>
+            <div className="col-3"></div>
+            <label className=" col-form-label activity-title" style={{ marginRight: 20 }}>Start Date</label>
+            <div className="col-2">
+              <DatePicker
+                onChange={e => startDateChanged(e, index)}
+                defaultValue={moment(inputDate1.start_date, dateFormat)}
+                format={dateFormat}
+              />
+            </div>
+
+            <label className="col-form-label activity-title" style={{ marginRight: 20 }}>End Date</label>
+            <div className="col-2">
+              <DatePicker
+                onChange={e => endDateChanged(e, index)}
+                defaultValue={moment(inputDate1.end_date, dateFormat)}
+                format={dateFormat}
+              />
+            </div>
+            <div className="form-label">
+              <span onClick={() => handleRemoveFieldsDate(index)}>
+                <CloseCircleOutlined />
+              </span>
+            </div>
+            <div className="col-2">
+            </div>
+          </div>
+          <div className="form-group row" style={{ marginTop: "10px" }}>
             <div className="col-2"></div>
             <div className="col-8">
               <Grid
                 pageable={true}
                 sortable={true}
-                filterable={true}
+                // filterable={true}
                 style={{
                   height: "auto",
                 }}
-                data={process(platList || [], dataState)}
+                data={process(inputDate1["pricing"] || [], dataState)}
                 {...dataState}
                 onDataStateChange={(e) => {
                   setDataState(e.dataState);
                 }}
               >
-                <Column field="Platform_id" title="Id" width="80px" hidden={true} />
-                <Column field="Platform_name" title="Platform Name" />
-                {ticketData.map((ticketData, index) => (
-                  <Column field="Published_price" title={ticketData.ticket_name} key={index}
+                <Column field="platform_id" title="Id" width="80px" hidden={true} />
+                <Column field="platform_name" title="Platform Name" />
+                {ticketData.map((ticketData, index1) => (
+                  <Column field="published_price" title={ticketData.ticket_name} key={index1}
                     cell={(props) => (
                       <td>
-                        <input
-                          format="n2"
-                          min={0}
-                          readOnly={true}
-                          value={props.dataItem.Published_price[index].price}
+                        <Input
+                          formatter={value => `${value}%`}
+                          readOnly
+                          parser={value => value.replace('%', '')}
+                          defaultValue={props.dataItem.published_price[index1].price}
                           style={{ width: '80px' }}
-                          onChange={e => priceChangedF(props, e)}
                         />
-                        <BsFillInfoCircleFill style={{ marginLeft: '5px' }} data-tip={"Markup Price: AED" + props.dataItem.Published_price[index].markup_price + ", Sale Price: AED" + props.dataItem.Published_price[index].price + ", You Get: AED" + props.dataItem.Published_price[index].price*(100-vendorData)/100} />
-                        <ReactTooltip />
                       </td>
                     )} />
                 ))}
-
-                < Column field="Sale_percentage" title="Sale Percentage"
+                <Column field="sale_percentage" title="Sale Percentage"
                   cell={(props) => (
                     <td>
                       <NumericTextBox
@@ -396,9 +515,17 @@ function Price(props) {
                         max={1}
                         min={0}
                         step={0.01}
-                        value={props.dataItem.Sale_percent}
-                        onChange={e => percentChangedF(props, e)}
+                        defa={inputDate1["pricing"][props.dataIndex]?.sale_percent}
+                        onChange={e => percentChanged(props, e, index)}
                       />
+                      {/* <InputNumber
+                        min={0}
+                        max={100}
+                        formatter={value => `${value}%`}
+                        parser={value => value.replace('%', '')}
+                        defalutvalue={inputDate1["pricing"][props.dataIndex].sale_percent}
+                        onChange={e => percentChanged(e, props, index)}
+                      /> */}
                     </td>
                   )}
                 />
@@ -406,212 +533,115 @@ function Price(props) {
             </div>
             <div className="col-2"></div>
           </div>
+        </Fragment>
+      ))}
 
-          <div className="form-group row" style={{ marginTop: '100px' }}>
-            <div className="col-2">
-              <button
-                className="btn btn-Tab"
-                type="button"
-                style={{ float: "right" }}
-                onClick={() => handleAddFieldsDate()}
-              >
-                Add Datewise Data
-              </button>
+      <div className="form-group row" style={{ marginTop: '100px' }}>
+        <div className="col-2">
+          <Button
+            className="mr-2"
+            type="primary"
+            style={{ float: "right" }}
+            onClick={() => handleAddFieldsDay()}
+          >
+            Add Daywise Data
+          </Button>
+        </div>
+        <div className="col-10"></div>
+
+      </div>
+
+      {inputDay.map((inputDay, index) => (
+        <Fragment key={index}>
+          <div className="form-row" style={{ marginTop: "15px" }}>
+            <div className="col-3"></div>
+            <div className="col-1">
+              <Select name="enable" style={{ width: "auto" }} defaultValue={inputDay["day"]} onChange={e => handleDayChanged(e, index)} allowClear>
+                <Option value="Monday">Monday</Option>
+                <Option value="Tuesday">Tuesday</Option>
+                <Option value="Wednesday">Wednesday</Option>
+                <Option value="Thursday">Thursday</Option>
+                <Option value="Friday">Friday</Option>
+                <Option value="Saturday">Saturday</Option>
+                <Option value="Sunday">Sunday</Option>
+              </Select>
             </div>
-            <div className="col-10"></div>
-
-          </div>
-
-          {inputDate.map((inputDate1, index) => (
-            <Fragment key={index}>
-              <div className="form-row" style={{ marginTop: "10px" }}>
-                <div className="col-2"></div>
-                <label className=" col-form-label activity-title" style={{ marginRight: 20 }}>Start Date</label>
-                <div className="col-3">
-                  <DatePicker
-                    name="start-date"
-                    onChange={e => startDateChanged(e, index)}
-                    value={inputDate1.start_date}
-                  />
-                </div>
-
-                <label className="col-form-label activity-title" style={{ marginRight: 20 }}>End Date</label>
-                <div className="col-3">
-                  <DatePicker
-                    name="end-date"
-                    onChange={e => endDateChanged(e, index)}
-                    value={inputDate1.end_date}
-                  />
-                </div>
-                <div className="col-form-label">
-                  <span className="btn btn-xs btn-icon btn-circle btn-white btn-hover-text-primary btn-shadow" style={{ backgroundColor: "#8950fc" }} onClick={() => handleRemoveFieldsDate(index)}>
-                    <i className="ki ki-bold-close icon-xs text-muted"></i>
-                  </span>
-                </div>
-                <div className="col-2">
-                </div>
-              </div>
-              <div className="form-group row">
-                <div className="col-2"></div>
-                <div className="col-8">
-                  <Grid
-                    pageable={true}
-                    sortable={true}
-                    filterable={true}
-                    style={{
-                      height: "auto",
-                    }}
-                    data={process(inputDate1["pricing"] || [], dataState)}
-                    {...dataState}
-                    onDataStateChange={(e) => {
-                      setDataState(e.dataState);
-                    }}
-                  >
-                    <Column field="platform_id" title="Id" width="80px" hidden={true} />
-                    <Column field="platform_name" title="Platform Name" />
-                    {ticketData.map((ticketData, index1) => (
-                      <Column field="published_price" title={ticketData.ticket_name} key={index1}
-                        cell={(props) => (
-                          <td>
-                            <input
-                              format="n2"
-                              min={0}
-                              readOnly={true}
-                              value={props.dataItem.published_price[index1].price}
-                              style={{ width: '80px' }}
-                              onChange={e => priceChangedF(props, e)}
-                            />
-                            {/* <BsFillInfoCircleFill style={{ marginLeft: '5px' }} data-tip={"Markup Price: AED" + props.dataItem.Published_price[index1].markup_price + ", Sale Price: AED" + props.dataItem.Published_price[index1].price} />
-                            <ReactTooltip /> */}
-                          </td>
-                        )} />
-                    ))}
-                    <Column field="sale_percentage" title="Sale Percentage"
-                      cell={(props) => (
-                        <td>
-                          <NumericTextBox
-                            format="p"
-                            max={1}
-                            min={0}
-                            step={0.01}
-                            value={inputDate1["pricing"][props.dataIndex].sale_percent}
-                            onChange={e => percentChanged(props, e, index)}
-                          />
-                        </td>
-                      )}
-                    />
-                  </Grid>
-                </div>
-                <div className="col-2"></div>
-              </div>
-            </Fragment>
-          ))}
-
-          <div className="form-group row" style={{ marginTop: '100px' }}>
-            <div className="col-2">
-              <button
-                className="btn btn-Tab"
-                type="button"
-                style={{ float: "right" }}
-                onClick={() => handleAddFieldsDay()}
-              >
-                Add Daywise Data
-              </button>
+            <div className="form-label">
+              <span onClick={() => handleRemoveFieldsDay(index)}>
+                <CloseCircleOutlined />
+              </span>
             </div>
-            <div className="col-10"></div>
-
+            <div className="col-2">
+            </div>
           </div>
-
-          {inputDay.map((inputDay, index) => (
-            <Fragment key={index}>
-              <div className="form-row" style={{ marginTop: "10px" }}>
-                <div className="col-4"></div>
-                <div className="col-4">
-                  <Select name="enable" style={{ width: "auto" }} value={inputDay["day"]} onChange={e => handleDayChanged(e, index)}>
-                    <option value="Monday">Monday</option>
-                    <option value="Tuesday">Tuesday</option>
-                    <option value="Wednesday">Wednesday</option>
-                    <option value="Thursday">Thursday</option>
-                    <option value="Friday">Friday</option>
-                    <option value="Saturday">Saturday</option>
-                    <option value="Sunday">Sunday</option>
-                  </Select>
-                </div>
-                <div className="col-form-label">
-                  <span className="btn btn-xs btn-icon btn-circle btn-white btn-hover-text-primary btn-shadow" style={{ backgroundColor: "#8950fc" }} onClick={() => handleRemoveFieldsDay(index)}>
-                    <i className="ki ki-bold-close icon-xs text-muted"></i>
-                  </span>
-                </div>
-                <div className="col-2">
-                </div>
-              </div>
-              <div className="form-group row">
-                <div className="col-2"></div>
-                <div className="col-8">
-                  <Grid
-                    pageable={true}
-                    sortable={true}
-                    filterable={true}
-                    style={{
-                      height: "auto",
-                    }}
-                    data={process(inputDay["pricing"] || [], dataState)}
-                    {...dataState}
-                    onDataStateChange={(e) => {
-                      setDataState(e.dataState);
-                    }}
-                  >
-                    <Column field="platform_id" title="Id" width="80px" hidden={true} />
-                    <Column field="platform_name" title="Platform Name" />
-                    {ticketData.map((ticketData, index1) => (
-                      <Column field="published_price" title={ticketData.ticket_name} key={index1}
-                        cell={(props) => (
-                          <td>
-                            <input
-                              format="n2"
-                              min={0}
-                              readOnly={true}
-                              value={props.dataItem.published_price[index1].price}
-                              style={{ width: '80px' }}
-                              onChange={e => priceChangedF(props, e)}
-                            />
-                            {/* <BsFillInfoCircleFill style={{ marginLeft: '5px' }} data-tip={"Markup Price: AED" + props.dataItem.Published_price[index1].markup_price + ", Sale Price: AED" + props.dataItem.Published_price[index1].price} />
-                            <ReactTooltip /> */}
-                          </td>
-                        )} />
-                    ))}
-                    <Column field="sale_percentage" title="Sale Percentage"
-                      cell={(props) => (
-                        <td>
-                          <NumericTextBox
-                            format="p"
-                            max={1}
-                            min={0}
-                            step={0.01}
-                            value={inputDay["pricing"][props.dataIndex].sale_percent}
-                            onChange={e => percentDayChanged(props, e, index)}
-                          />
-                        </td>
-                      )}
-                    />
-                  </Grid>
-                </div>
-                <div className="col-2"></div>
-              </div>
-            </Fragment>
-          ))}
-
-          <div className="form-group">
-            <button
-              type="submit"
-              className={`btn btn-Tab`}
-              style={{ float: "right", marginRight: 200, marginTop: 30 }}
-              onSubmit={() => handleSubmit()}
-            >Submit</button>
+          <div className="form-group row" style={{ marginTop: "10px" }}>
+            <div className="col-2"></div>
+            <div className="col-8">
+              <Grid
+                pageable={true}
+                sortable={true}
+                // filterable={true}
+                style={{
+                  height: "auto",
+                }}
+                data={process(inputDay["pricing"] || [], dataState)}
+                {...dataState}
+                onDataStateChange={(e) => {
+                  setDataState(e.dataState);
+                }}
+              >
+                <Column field="platform_id" title="Id" width="80px" hidden={true} />
+                <Column field="platform_name" title="Platform Name" />
+                {ticketData.map((ticketData, index1) => (
+                  <Column field="published_price" title={ticketData.ticket_name} key={index1}
+                    cell={(props) => (
+                      <td>
+                        <Input
+                          formatter={value => `${value}%`}
+                          readOnly
+                          parser={value => value.replace('%', '')}
+                          defaultValue={props.dataItem.published_price[index1].price}
+                          style={{ width: '80px' }}
+                        />
+                      </td>
+                    )} />
+                ))}
+                <Column field="sale_percentage" title="Sale Percentage"
+                  cell={(props) => (
+                    <td>
+                      <NumericTextBox
+                        format="p"
+                        max={1}
+                        min={0}
+                        step={0.01}
+                        value={inputDay["pricing"][props.dataIndex]?.sale_percent}
+                        onChange={e => percentDayChanged(props, e, index)}
+                      />
+                      {/* <InputNumber
+                        min={0}
+                        max={100}
+                        formatter={value => `${value}%`}
+                        parser={value => value.replace('%', '')}
+                        defalutvalue={inputDay["pricing"][props.dataIndex].sale_percent}
+                        onChange={e => percentDayChanged(e, props, index)}
+                      /> */}
+                    </td>
+                  )}
+                />
+              </Grid>
+            </div>
+            <div className="col-2"></div>
           </div>
-        </Form>
-      )}
-    </Formik>
+        </Fragment>
+      ))}
+
+      <Form.Item>
+        <Button className="mr-2" type="primary" htmlType="submit" style={{ float: 'right' }} >
+          Submit
+        </Button>
+      </Form.Item>
+
+    </Form>
   );
 }
 

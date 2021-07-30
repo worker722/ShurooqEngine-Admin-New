@@ -67,6 +67,7 @@ export const usersSlice = createSlice({
         setUserDataFetched: (state, action) => {
             state.actionsLoading = false;
             state.userData = null;
+            state.userListData = null;
             state.error = null;
         },
     }

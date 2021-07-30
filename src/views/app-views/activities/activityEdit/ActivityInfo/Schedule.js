@@ -322,7 +322,6 @@ export default function Schedule(props) {
   const selectDay = (event, index) => {
     const list = [...inputDay];
     const value = event.target.checked;
-console.log(value, event.target)
     let spliceNum = -1;
     if (value) {
       list[index]['days'].push(Number(event.target.name))
