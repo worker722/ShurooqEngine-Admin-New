@@ -8,10 +8,10 @@ import { EyeOutlined, UserAddOutlined, SearchOutlined, PlusCircleOutlined } from
 import AvatarStatus from 'components/shared-components/AvatarStatus';
 import Flex from 'components/shared-components/Flex'
 import utils from 'utils'
-import * as actions from "../../../_redux/users/usersActions";
+import * as actions from "../../../_redux/vendors/vendorsActions";
 
 function ListForm(props) {
-	const { userListData } = props;
+	const { vendorListData } = props;
 	const history = useHistory();
 
 	const tableColumns = [
@@ -20,24 +20,54 @@ function ListForm(props) {
 			dataIndex: 'id'
 		},
 		{
-			title: 'Username',
-			dataIndex: 'username',
-			render: (_, record) => (
-				<div className="d-flex">
-					<AvatarStatus name={record.username} />
-				</div>
-			),
-			sorter: (a, b) => utils.antdTableSorter(a, b, 'name')
-		},
-		{
-			title: 'Userrole',
+			title: 'Name',
 			dataIndex: 'name',
 			render: (_, record) => (
 				<div className="d-flex">
 					<AvatarStatus name={record.name} />
 				</div>
 			),
-			sorter: (a, b) => utils.antdTableSorter(a, b, 'role')
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'name')
+		},
+		{
+			title: 'Description',
+			dataIndex: 'description',
+			render: (_, record) => (
+				<div className="d-flex">
+					<AvatarStatus name={record.description} />
+				</div>
+			),
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'description')
+		},
+        {
+			title: 'Location',
+			dataIndex: 'location',
+			render: (_, record) => (
+				<div className="d-flex">
+					<AvatarStatus name={record.location} />
+				</div>
+			),
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'location')
+		},
+        {
+			title: 'Our Commission',
+			dataIndex: 'our_commission',
+			render: (_, record) => (
+				<div className="d-flex">
+					<AvatarStatus name={record.our_commission} />
+				</div>
+			),
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'our_commission')
+		},
+        {
+			title: 'Allowed Users',
+			dataIndex: 'allowed_users',
+			render: (_, record) => (
+				<div className="d-flex">
+					<AvatarStatus name={record.allowed_users} />
+				</div>
+			),
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'allowed_users')
 		},
 		{
 			title: 'Edit',
@@ -51,19 +81,19 @@ function ListForm(props) {
 	];
 
 	const userEdit = (event, id) => {
-		history.push("/app/add-user/" + id);
+		history.push("/app/vendors/" + id);
 	}
 	
 	const userAdd = () => {
-		history.push("/app/add-user/new");
+		history.push("/app/vendors/new");
 	}
 
-	const [list, setList] = useState(userListData)
+	const [list, setList] = useState(vendorListData)
 
 
 	const onSearch = e => {
 		const value = e.currentTarget.value
-		const searchArray = e.currentTarget.value ? list : userListData
+		const searchArray = e.currentTarget.value ? list : vendorListData
 		const data = utils.wildCardSearch(searchArray, value)
 		setList(data)
 	}
@@ -91,30 +121,28 @@ function ListForm(props) {
 	)
 }
 
-const UserList = () => {
+const VendorList = () => {
 
 	const dispatch = useDispatch();
 	const history = useHistory();
     const [load, setLoad] = useState(0);
 	const token = useSelector(({ auth }) => auth.authToken, shallowEqual);
 	useEffect(() => {
-		dispatch(actions.getUserLists(token));
+        dispatch(actions.getVendorLists());
 		setLoad(1);
 	}, []);
-	const { userListData } = useSelector(
-		(state) => ({
-			userListData: state.users.userListData,
-		}),
-		shallowEqual
-	);
-
-	console.log(userListData, load)
+	const { vendorListData } = useSelector(
+        (state) => ({
+            vendorListData: state.vendors.vendorListData,
+        }),
+        shallowEqual
+      );
 
 	return (
 		<div>
-			{userListData && load == 1 && <ListForm userListData={userListData} />}
+			{vendorListData && load == 1 && <ListForm vendorListData={vendorListData} />}
 		</div>
 	)
 }
 
-export default UserList
+export default VendorList

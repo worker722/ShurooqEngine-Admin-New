@@ -1,6 +1,6 @@
 import * as requestFromServer from "./vendormealsCrud";
 import { vendormealsSlice, callTypes } from "./vendormealsSlice";
-import MockUtils from "../../../../_utiles/mock.utils";
+import MockUtils from "../../../_utiles/mock.utils";
 
 const { actions } = vendormealsSlice;
 export const getVendor = queryParams => dispatch => {

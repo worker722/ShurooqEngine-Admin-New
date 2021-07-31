@@ -8,10 +8,10 @@ import { EyeOutlined, UserAddOutlined, SearchOutlined, PlusCircleOutlined } from
 import AvatarStatus from 'components/shared-components/AvatarStatus';
 import Flex from 'components/shared-components/Flex'
 import utils from 'utils'
-import * as actions from "../../../_redux/users/usersActions";
+import * as actions from "../../../_redux/vendoramenities/vendoramenitiesActions";
 
 function ListForm(props) {
-	const { userListData } = props;
+	const { vendorAmenitieListData } = props;
 	const history = useHistory();
 
 	const tableColumns = [
@@ -20,24 +20,24 @@ function ListForm(props) {
 			dataIndex: 'id'
 		},
 		{
-			title: 'Username',
-			dataIndex: 'username',
+			title: 'Amenity Name',
+			dataIndex: 'amenity_name',
 			render: (_, record) => (
 				<div className="d-flex">
-					<AvatarStatus name={record.username} />
+					<AvatarStatus name={record.amenity_name} />
 				</div>
 			),
-			sorter: (a, b) => utils.antdTableSorter(a, b, 'name')
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'amenity_name')
 		},
-		{
-			title: 'Userrole',
-			dataIndex: 'name',
+        {
+			title: 'Enable',
+			dataIndex: 'enable',
 			render: (_, record) => (
 				<div className="d-flex">
-					<AvatarStatus name={record.name} />
+					<AvatarStatus name={record.enable.toString()} />
 				</div>
 			),
-			sorter: (a, b) => utils.antdTableSorter(a, b, 'role')
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'enable')
 		},
 		{
 			title: 'Edit',
@@ -51,19 +51,19 @@ function ListForm(props) {
 	];
 
 	const userEdit = (event, id) => {
-		history.push("/app/add-user/" + id);
+		history.push("/app/vendor-amenities/" + id);
 	}
 	
 	const userAdd = () => {
-		history.push("/app/add-user/new");
+		history.push("/app/vendor-amenities/new");
 	}
 
-	const [list, setList] = useState(userListData)
+	const [list, setList] = useState(vendorAmenitieListData)
 
 
 	const onSearch = e => {
 		const value = e.currentTarget.value
-		const searchArray = e.currentTarget.value ? list : userListData
+		const searchArray = e.currentTarget.value ? list : vendorAmenitieListData
 		const data = utils.wildCardSearch(searchArray, value)
 		setList(data)
 	}
@@ -91,30 +91,28 @@ function ListForm(props) {
 	)
 }
 
-const UserList = () => {
+const VendorAmensList = () => {
 
 	const dispatch = useDispatch();
 	const history = useHistory();
     const [load, setLoad] = useState(0);
 	const token = useSelector(({ auth }) => auth.authToken, shallowEqual);
 	useEffect(() => {
-		dispatch(actions.getUserLists(token));
+        dispatch(actions.getVendorAmenitieLists());
 		setLoad(1);
 	}, []);
-	const { userListData } = useSelector(
-		(state) => ({
-			userListData: state.users.userListData,
-		}),
-		shallowEqual
-	);
-
-	console.log(userListData, load)
+	const { vendorAmenitieListData } = useSelector(
+        (state) => ({
+            vendorAmenitieListData: state.vendoramenities.vendorAmenitieListData,
+        }),
+        shallowEqual
+      );
 
 	return (
 		<div>
-			{userListData && load == 1 && <ListForm userListData={userListData} />}
+			{vendorAmenitieListData && load == 1 && <ListForm vendorAmenitieListData={vendorAmenitieListData} />}
 		</div>
 	)
 }
 
-export default UserList
+export default VendorAmensList

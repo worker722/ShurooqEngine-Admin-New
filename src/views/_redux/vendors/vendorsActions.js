@@ -1,8 +1,6 @@
 import * as requestFromServer from "./vendorsCrud";
 import { vendorsSlice, callTypes } from "./vendorsSlice";
-import MockUtils from "../../../../_utiles/mock.utils";
-import { ContactSupportOutlined } from "@material-ui/icons";
-import { clientObjectFields } from '../../../../_utiles/config';
+import MockUtils from "../../../_utiles/mock.utils";
 
 const { actions } = vendorsSlice;
 

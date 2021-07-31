@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_URL } from "../../../../_utiles/config";
+import { API_URL } from "../../../_utiles/config";
 
 export const proxyurl = "https://cors-anywhere.herokuapp.com/";
 export const VENDORS_URL = `${API_URL}/admin/vendors`;

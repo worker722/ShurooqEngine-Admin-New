@@ -8,6 +8,10 @@
 
 	"sidenav.manageuser": "User Management",
 	"sidenav.activities": "Activities",
+	"sidenav.vendors": "Vendors",
+	"sidenav.vendor-meals": "Vendor Meals",
+	"sidenav.vendor-transports": "Vendor Transports",
+	"sidenav.vendor-amenities": "Vendor Amenities",
 
 
 	"sidenav.apps": "Apps",

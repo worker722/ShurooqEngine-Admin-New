@@ -8,10 +8,10 @@ import { EyeOutlined, UserAddOutlined, SearchOutlined, PlusCircleOutlined } from
 import AvatarStatus from 'components/shared-components/AvatarStatus';
 import Flex from 'components/shared-components/Flex'
 import utils from 'utils'
-import * as actions from "../../../_redux/users/usersActions";
+import * as actions from "../../../_redux/vendortransports/vendortransportsActions";
 
 function ListForm(props) {
-	const { userListData } = props;
+	const { vendorTransportListData } = props;
 	const history = useHistory();
 
 	const tableColumns = [
@@ -20,24 +20,44 @@ function ListForm(props) {
 			dataIndex: 'id'
 		},
 		{
-			title: 'Username',
-			dataIndex: 'username',
+			title: 'Transport Name',
+			dataIndex: 'transport_name',
 			render: (_, record) => (
 				<div className="d-flex">
-					<AvatarStatus name={record.username} />
+					<AvatarStatus name={record.transport_name} />
 				</div>
 			),
-			sorter: (a, b) => utils.antdTableSorter(a, b, 'name')
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'transport_name')
 		},
 		{
-			title: 'Userrole',
-			dataIndex: 'name',
+			title: 'Oneway Price',
+			dataIndex: 'oneway_price',
 			render: (_, record) => (
 				<div className="d-flex">
-					<AvatarStatus name={record.name} />
+					<AvatarStatus name={record.oneway_price} />
 				</div>
 			),
-			sorter: (a, b) => utils.antdTableSorter(a, b, 'role')
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'oneway_price')
+		},
+		{
+			title: 'Twoway Price',
+			dataIndex: 'twoway_price',
+			render: (_, record) => (
+				<div className="d-flex">
+					<AvatarStatus name={record.twoway_price} />
+				</div>
+			),
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'twoway_price')
+		},
+        {
+			title: 'Enable',
+			dataIndex: 'enable',
+			render: (_, record) => (
+				<div className="d-flex">
+					<AvatarStatus name={record.enable.toString()} />
+				</div>
+			),
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'enable')
 		},
 		{
 			title: 'Edit',
@@ -51,19 +71,19 @@ function ListForm(props) {
 	];
 
 	const userEdit = (event, id) => {
-		history.push("/app/add-user/" + id);
+		history.push("/app/vendor-transports/" + id);
 	}
 	
 	const userAdd = () => {
-		history.push("/app/add-user/new");
+		history.push("/app/vendor-transports/new");
 	}
 
-	const [list, setList] = useState(userListData)
+	const [list, setList] = useState(vendorTransportListData)
 
 
 	const onSearch = e => {
 		const value = e.currentTarget.value
-		const searchArray = e.currentTarget.value ? list : userListData
+		const searchArray = e.currentTarget.value ? list : vendorTransportListData
 		const data = utils.wildCardSearch(searchArray, value)
 		setList(data)
 	}
@@ -91,30 +111,28 @@ function ListForm(props) {
 	)
 }
 
-const UserList = () => {
+const VendorTransList = () => {
 
 	const dispatch = useDispatch();
 	const history = useHistory();
     const [load, setLoad] = useState(0);
 	const token = useSelector(({ auth }) => auth.authToken, shallowEqual);
 	useEffect(() => {
-		dispatch(actions.getUserLists(token));
+        dispatch(actions.getVendorTransportLists());
 		setLoad(1);
 	}, []);
-	const { userListData } = useSelector(
-		(state) => ({
-			userListData: state.users.userListData,
-		}),
-		shallowEqual
-	);
-
-	console.log(userListData, load)
+	const { vendorTransportListData } = useSelector(
+        (state) => ({
+            vendorTransportListData: state.vendortransports.vendorTransportListData,
+        }),
+        shallowEqual
+      );
 
 	return (
 		<div>
-			{userListData && load == 1 && <ListForm userListData={userListData} />}
+			{vendorTransportListData && load == 1 && <ListForm vendorTransportListData={vendorTransportListData} />}
 		</div>
 	)
 }
 
-export default UserList
+export default VendorTransList

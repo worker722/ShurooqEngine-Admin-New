@@ -95,7 +95,8 @@ function EditForm(props) {
 	};
 
 	const gotoList = () => {
-		dispatch(actions.setUserData()).then(() => history.push("/app/add-user"));
+		// dispatch(actions.setUserData());
+		history.goBack();
 	}
 	const [selectVal, setSelectVal] = useState(1);
 	function handleChange(value) {
@@ -139,10 +140,10 @@ const UserCreate = ({
 
 	const addUser = (values) => {
 		dispatch(actions.addUser(values, token)).then(() => gotoList());
-	};;
+	}
 
 	const gotoList = () => {
-		dispatch(actions.setUserData()).then(() => history.push("/app/add-user"));
+		history.goBack();
 	}
 
 	const [form] = Form.useForm();

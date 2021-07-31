@@ -71,7 +71,7 @@ const ActivityCreate = () => {
         <Card>
             <Flex alignItems="center" justifyContent="between" mobileFlex={false}>
                 <Flex className="mb-1" mobileFlex={false}>
-                    <h2>Add USer</h2>
+                    <h2>Add Activity</h2>
                 </Flex>
                 <div>
                     <Button type="primary" onClick={gotoList} icon={<LeftOutlined />} block>Back</Button>

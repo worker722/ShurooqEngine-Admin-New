@@ -8,10 +8,10 @@ import { EyeOutlined, UserAddOutlined, SearchOutlined, PlusCircleOutlined } from
 import AvatarStatus from 'components/shared-components/AvatarStatus';
 import Flex from 'components/shared-components/Flex'
 import utils from 'utils'
-import * as actions from "../../../_redux/users/usersActions";
+import * as actions from "../../../_redux/vendormeals/vendormealsActions";
 
 function ListForm(props) {
-	const { userListData } = props;
+	const { vendorMealListData } = props;
 	const history = useHistory();
 
 	const tableColumns = [
@@ -20,24 +20,34 @@ function ListForm(props) {
 			dataIndex: 'id'
 		},
 		{
-			title: 'Username',
-			dataIndex: 'username',
+			title: 'Meal Name',
+			dataIndex: 'meal_name',
 			render: (_, record) => (
 				<div className="d-flex">
-					<AvatarStatus name={record.username} />
+					<AvatarStatus name={record.meal_name} />
 				</div>
 			),
-			sorter: (a, b) => utils.antdTableSorter(a, b, 'name')
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'meal_name')
 		},
 		{
-			title: 'Userrole',
-			dataIndex: 'name',
+			title: 'Price',
+			dataIndex: 'price',
 			render: (_, record) => (
 				<div className="d-flex">
-					<AvatarStatus name={record.name} />
+					<AvatarStatus name={record.price} />
 				</div>
 			),
-			sorter: (a, b) => utils.antdTableSorter(a, b, 'role')
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'price')
+		},
+        {
+			title: 'Enable',
+			dataIndex: 'enable',
+			render: (_, record) => (
+				<div className="d-flex">
+					<AvatarStatus name={record.enable.toString()} />
+				</div>
+			),
+			sorter: (a, b) => utils.antdTableSorter(a, b, 'enable')
 		},
 		{
 			title: 'Edit',
@@ -51,19 +61,19 @@ function ListForm(props) {
 	];
 
 	const userEdit = (event, id) => {
-		history.push("/app/add-user/" + id);
+		history.push("/app/vendor-meals/" + id);
 	}
 	
 	const userAdd = () => {
-		history.push("/app/add-user/new");
+		history.push("/app/vendor-meals/new");
 	}
 
-	const [list, setList] = useState(userListData)
+	const [list, setList] = useState(vendorMealListData)
 
 
 	const onSearch = e => {
 		const value = e.currentTarget.value
-		const searchArray = e.currentTarget.value ? list : userListData
+		const searchArray = e.currentTarget.value ? list : vendorMealListData
 		const data = utils.wildCardSearch(searchArray, value)
 		setList(data)
 	}
@@ -91,30 +101,28 @@ function ListForm(props) {
 	)
 }
 
-const UserList = () => {
+const VendorMealList = () => {
 
 	const dispatch = useDispatch();
 	const history = useHistory();
     const [load, setLoad] = useState(0);
 	const token = useSelector(({ auth }) => auth.authToken, shallowEqual);
 	useEffect(() => {
-		dispatch(actions.getUserLists(token));
+        dispatch(actions.getVendorMealLists());
 		setLoad(1);
 	}, []);
-	const { userListData } = useSelector(
-		(state) => ({
-			userListData: state.users.userListData,
-		}),
-		shallowEqual
-	);
-
-	console.log(userListData, load)
+	const { vendorMealListData } = useSelector(
+        (state) => ({
+            vendorMealListData: state.vendormeals.vendorMealListData,
+        }),
+        shallowEqual
+      );
 
 	return (
 		<div>
-			{userListData && load == 1 && <ListForm userListData={userListData} />}
+			{vendorMealListData && load == 1 && <ListForm vendorMealListData={vendorMealListData} />}
 		</div>
 	)
 }
 
-export default UserList
+export default VendorMealList

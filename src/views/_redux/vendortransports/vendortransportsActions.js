@@ -1,6 +1,6 @@
 import * as requestFromServer from "./vendortransportsCrud";
 import { vendortransportsSlice, callTypes } from "./vendortransportsSlice";
-import MockUtils from "../../../../_utiles/mock.utils";
+import MockUtils from "../../../_utiles/mock.utils";
 
 const { actions } = vendortransportsSlice;
 export const getVendor = queryParams => dispatch => {
