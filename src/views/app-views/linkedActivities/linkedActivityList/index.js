@@ -58,8 +58,11 @@ function ListForm(props) {
 		history.push("/app/linked-activities/new");
 	}
 
-	const [list, setList] = useState(linkedactivitiesList)
+	const [list, setList] = useState(null)
 
+	useEffect(() => {
+		setList(linkedactivitiesList);
+	}, [linkedactivitiesList])
 
 	const onSearch = e => {
 		const value = e.currentTarget.value
@@ -68,6 +71,15 @@ function ListForm(props) {
 		setList(data)
 	}
 
+	return (
+		<div>
+			{list != null && <NewForm list={list} tableColumns={tableColumns} onSearch={onSearch} userAdd={userAdd} />}
+		</div>
+	)
+}
+
+function NewForm(props) {
+	const {list, tableColumns, onSearch, userAdd} = props;
 	return (
 		<Card>
 			<Flex alignItems="center" justifyContent="between" mobileFlex={false}>
@@ -99,7 +111,6 @@ const LinkedActivityList = () => {
 	const token = useSelector(({ auth }) => auth.authToken, shallowEqual);
 	useEffect(() => {
         dispatch(actions.getLinkedActivitieslist());
-		setLoad(1);
 	}, []);
 	const { linkedactivitiesList } = useSelector(
         (state) => ({
@@ -108,10 +119,10 @@ const LinkedActivityList = () => {
         shallowEqual
     );
 
-	const [lstData, setLstData] = useState([]);
+	const [lstData, setLstData] = useState(null);
     useEffect(() => {
         let listActivity = [];
-        for (var i = 0; i < linkedactivitiesList.length; i++) {
+        for (var i = 0; i < linkedactivitiesList?.length; i++) {
             let data = {};
             data["id"] = linkedactivitiesList[i].id;
             data["name"] = JSON.parse(linkedactivitiesList[i].linked_activties)[0]?.name;
@@ -122,9 +133,13 @@ const LinkedActivityList = () => {
         setLstData(listActivity);
     }, [linkedactivitiesList])
 
+	useEffect(() => {
+		setLoad(1);
+	}, [lstData])
+
 	return (
 		<div>
-			{lstData && load == 1 && <ListForm linkedactivitiesList={lstData} />}
+			{lstData != null && load == 1 && <ListForm linkedactivitiesList={lstData} />}
 		</div>
 	)
 }

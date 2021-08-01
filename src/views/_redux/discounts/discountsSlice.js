@@ -4,7 +4,7 @@ const initialProductsState = {
     listLoading: false,
     actionsLoading: false,
 
-    discountsList: [],
+    discountsList: undefined,
     activityList: [],
     vendorList: [],
     platformList: [],

@@ -29,7 +29,7 @@ export const editLinkedActivities = (editActivityData, token) => dispatch => {
 };
 
 export const getLinkedActivitieslist = (token) => dispatch => {
-    dispatch(actions.startCall({ callType: callTypes.action }));
+    // dispatch(actions.startCall({ callType: callTypes.action }));
     return requestFromServer
         .getLinkedActivitieslist(token)
         .then(({ data }) => {

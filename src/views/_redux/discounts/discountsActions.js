@@ -28,10 +28,10 @@ export const editDiscount = (editActivityData, token) => dispatch => {
         });
 };
 
-export const getDiscountslist = (token) => dispatch => {
-    dispatch(actions.startCall({ callType: callTypes.action }));
+export const getDiscountslist = () => dispatch => {
+    // dispatch(actions.startCall({ callType: callTypes.action }));
     return requestFromServer
-        .getDiscountslist(token)
+        .getDiscountslist()
         .then(({ data }) => {
             if (data.success) {
                 dispatch(actions.getDiscountsDataFetched({ statusData: data.data }));

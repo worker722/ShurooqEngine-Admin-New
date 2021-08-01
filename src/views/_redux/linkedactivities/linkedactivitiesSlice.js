@@ -4,7 +4,7 @@ const initialProductsState = {
     listLoading: false,
     actionsLoading: false,
 
-    linkedactivitiesList: [],
+    linkedactivitiesList: undefined,
     activityList: [],
     vendorList: [],
     platformList: [],
