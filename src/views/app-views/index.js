@@ -14,6 +14,8 @@ export const AppViews = () => {
         <Route path={`${APP_PREFIX_PATH}/vendor-meals`} component={lazy(() => import(`./vendorMeals`))} />
         <Route path={`${APP_PREFIX_PATH}/vendor-transports`} component={lazy(() => import(`./vendorTransports`))} />
         <Route path={`${APP_PREFIX_PATH}/vendor-amenities`} component={lazy(() => import(`./vendorAmenities`))} />
+        <Route path={`${APP_PREFIX_PATH}/discounts`} component={lazy(() => import(`./discounts`))} />
+        <Route path={`${APP_PREFIX_PATH}/linked-activities`} component={lazy(() => import(`./linkedActivities`))} />
         
         <Redirect from={`${APP_PREFIX_PATH}`} to={`${APP_PREFIX_PATH}/dashboards`} />
       </Switch>

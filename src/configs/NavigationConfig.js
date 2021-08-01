@@ -155,6 +155,42 @@ const VendorAmenitiesNavTree = [{
   ]
 }]
 
+const DiscountsNavTree = [{
+  key: 'discounts',
+  path: `${APP_PREFIX_PATH}/discounts`,
+  title: 'sidenav.discounts',
+  icon: ShoppingCartOutlined,
+  breadcrumb: false,
+  submenu: [
+    {
+      key: 'discounts',
+      path: `${APP_PREFIX_PATH}/discounts/list`,
+      title: 'sidenav.discounts',
+      icon: ShoppingCartOutlined,
+      breadcrumb: false,
+      submenu: []
+    }
+  ]
+}]
+
+const LinkedActivitiesNavTree = [{
+  key: 'linked-activities',
+  path: `${APP_PREFIX_PATH}/linked-activities`,
+  title: 'sidenav.linked-activities',
+  icon: CompassOutlined,
+  breadcrumb: false,
+  submenu: [
+    {
+      key: 'linked-activities',
+      path: `${APP_PREFIX_PATH}/linked-activities/list`,
+      title: 'sidenav.linked-activities',
+      icon: CompassOutlined,
+      breadcrumb: false,
+      submenu: []
+    }
+  ]
+}]
+
 
 const navigationConfig = [
   ...dashBoardNavTree,
@@ -164,6 +200,8 @@ const navigationConfig = [
   ...VendorMealNavTree,
   ...VendorTransportsNavTree,
   ...VendorAmenitiesNavTree,
+  ...DiscountsNavTree,
+  ...LinkedActivitiesNavTree,
 ]
 
 export default navigationConfig;
