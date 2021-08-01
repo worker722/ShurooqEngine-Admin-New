@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useDispatch } from "react-redux";
 import { shallowEqual, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useDispatch } from "react-redux";
 import { shallowEqual, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -139,16 +139,17 @@ const UserCreate = ({
 	}, [id]);
 
 	const addUser = (values) => {
-		dispatch(actions.addUser(values, token)).then(() => backToUserList());
+		dispatch(actions.addUser(values, token)).then(() => handleOnClick());
 	}
 
 	const backToUserList = () => {
-        history.push("/app/add-user");
-    };
+		history.push("/app/add-user");
+	};
 
 	const gotoList = () => {
 		history.goBack();
 	}
+	const handleOnClick = useCallback(() => history.push('/app/add-user'), [history]);
 
 	const [form] = Form.useForm();
 	const onFinish = values => {
