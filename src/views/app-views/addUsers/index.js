@@ -7,12 +7,14 @@ import UserList from "./userList";
 const AddUsers = props => {
   const { match } = props
   return (
-    <Switch>
-      <Redirect exact from={`${match.url}`} to={`${match.url}/list`} />
-      <Route path={`${match.url}/list`} component={UserList} />
-      <Route path={`${match.url}/new`} component={UserCreate} />
-      <Route path={`${match.url}/:id`} component={UserCreate} />
-    </Switch>
+    <Suspense>
+      <Switch>
+        <Redirect exact from={`${match.url}`} to={`${match.url}/list`} />
+        <Route path={`${match.url}/list`} component={UserList} />
+        <Route path={`${match.url}/new`} component={UserCreate} />
+        <Route path={`${match.url}/:id`} component={UserCreate} />
+      </Switch>
+    </Suspense>
   )
 };
 

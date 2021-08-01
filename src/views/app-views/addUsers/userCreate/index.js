@@ -139,8 +139,12 @@ const UserCreate = ({
 	}, [id]);
 
 	const addUser = (values) => {
-		dispatch(actions.addUser(values, token)).then(() => gotoList());
+		dispatch(actions.addUser(values, token)).then(() => backToUserList());
 	}
+
+	const backToUserList = () => {
+        history.push("/app/add-user");
+    };
 
 	const gotoList = () => {
 		history.goBack();

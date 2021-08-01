@@ -5,7 +5,7 @@ import MockUtils from "../../../_utiles/mock.utils";
 const { actions } = usersSlice;
 
 export const addUser = (productForCreation, token) => dispatch => {
-    dispatch(actions.startCall({ callType: callTypes.action }));
+    // dispatch(actions.startCall({ callType: callTypes.action }));
     return requestFromServer
         .addUser(productForCreation, token)
         .then(({data}) => {

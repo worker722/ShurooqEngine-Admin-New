@@ -57,7 +57,6 @@ export const usersSlice = createSlice({
         statusFetched: (state, action) => {
             state.actionsLoading = false;
             state.statusData = action.payload.statusData;
-            console.log(state.statusData)
             state.error = null;
         },
         userListFetched: (state, action) => {
