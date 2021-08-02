@@ -92,7 +92,6 @@ function ListForm(props) {
 }
 
 const UserList = () => {
-
 	const dispatch = useDispatch();
 	const history = useHistory();
     const [load, setLoad] = useState(0);
@@ -107,8 +106,6 @@ const UserList = () => {
 		}),
 		shallowEqual
 	);
-
-	console.log(userListData, load)
 
 	return (
 		<div>

@@ -139,11 +139,11 @@ const UserCreate = ({
 	}, [id]);
 
 	const addUser = (values) => {
-		dispatch(actions.addUser(values, token)).then(() => handleOnClick());
+		dispatch(actions.addUser(values, token)).then(() => backToUserList());
 	}
 
 	const backToUserList = () => {
-		history.push("/app/add-user");
+		// history.push("/app/add-user");
 	};
 
 	const gotoList = () => {
